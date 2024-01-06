@@ -1,0 +1,126 @@
+# "attribute" = ""
+"type" = "blue"
+# "type.builtin" = ""
+# "type.enum.variant" = ""
+# "constructor" = ""
+"constant" = "red"
+# "constant.builtin" = ""
+# "constant.builtin.boolean" = ""
+# "constant.character" = ""
+# "constant.character.escape" = ""
+# "constant.numeric" = ""
+# "constant.numeric.integer" = ""
+# "constant.numeric.float" = ""
+"string" = "green"
+# "string.regexp" = ""
+# "string.regexp" = ""
+# "string.special" = ""
+# "string.special.path" = ""
+# "string.special.url" = ""
+# "string.special.symbol" = ""
+"comment" = "#777777"
+# "comment.line" = ""
+# "comment.block" = ""
+# "comment.block.documentation" = ""
+"variable" = "cyan"
+"variable.builtin" = "magenta"
+# "variable.parameter" = ""
+# "variable.other" = ""
+# "variable.other.member" = ""
+"label" = "yellow"
+"punctuation" = "#bbbbbb"
+# "punctuation.delimiter" = ""
+# "punctuation.bracket" = ""
+# "punctuation.special" = ""
+"keyword" = "magenta"
+# "keyword.control" = ""
+# "keyword.control.conditional" = ""
+# "keyword.control.repeat" = ""
+# "keyword.control.import" = ""
+# "keyword.control.return" = ""
+# "keyword.control.exception" = ""
+# "keyword.operator" = ""
+# "keyword.directive" = ""
+# "keyword.function" = ""
+# "keyword.storage" = ""
+# "keyword.storage.type" = ""
+# "keyword.storage.modifier" = ""
+# "operator" = ""
+"function" = "yellow"
+# "function.builtin" = ""
+# "function.method" = ""
+"function.macro" = "red"
+# "function.special" = ""
+"tag" = "blue"
+"tag.builtin" = "cyan"
+"namespace" = "blue"
+# "special = ""
+# "markup" = ""
+"markup.heading" = { modifiers = ["bold"] }
+# "markup.list" = ""
+"markup.bold" = { modifiers = ["bold"] }
+"markup.italic" = { modifiers = ["italic"] }
+"markup.strikethrough" = { modifiers = ["crossed_out"] }
+"markup.link" = { fg = "blue" }
+"markup.quote" = { fg = "#777777" }
+"markup.raw" = { fg = "#777777" }
+"diff.plus" = "green"
+"diff.minus" = "red"
+"diff.delta" = "blue"
+
+# "markup.normal.completion" = ""
+# "markup.normal.hover" = ""
+# "markup.heading.completion" = ""
+# "markup.heading.hover" = ""
+# "markup.raw.inline.completion" = ""
+# "markup.raw.inline.hover" = ""
+
+"ui.background" = { bg = "#000000" }
+"ui.background.separator" = "#222222"
+"ui.cursor" = { bg = "#aaaaaa" }
+# "ui.cursor.normal" = """
+# "ui.cursor.insert" = """
+# "ui.cursor.select" = """
+# "ui.cursor.match" = ""
+"ui.cursor.primary" = { modifiers = ["reversed"] }
+# "ui.cursor.primary.normal" = ""
+# "ui.cursor.primary.insert" = ""
+# "ui.cursor.primary.select" = ""
+# "ui.debug.breakpoint" = ""
+# "ui.debug.active" = ""
+# "ui.gutter" = ""
+"ui.gutter.selected" = { bg = "#333333" }
+"ui.highlight.frameline" = { bg = "#333333" }
+"ui.linenr" = "#777777"
+"ui.linenr.selected" = { bg = "#333333" }
+"ui.statusline" = { bg = "#333333" }
+"ui.statusline.active" = "blue"
+"ui.statusline.normal" = "blue"
+"ui.statusline.insert" = "red"
+"ui.statusline.select" = "green"
+"ui.statusline.separator" = "#777777"
+"ui.popup" = { bg = "#111111" }
+"ui.popup.info" = { bg = "#1111111", fg = "#bbbbbb" }
+"ui.window" = "#222222"
+"ui.help" = { bg = "#111111", fg = "#bbbbbb" }
+"ui.text" = "#bbbbbb"
+"ui.text.focus" = "blue"
+"ui.virtual.whitespace" = "#444444"
+"ui.virtual.indent-guide" = "#444444"
+"ui.virtual.inlay-hint" = { fg = "#777777", modifiers = ["italic"] }
+"ui.virtual.wrap" = "#777777"
+"ui.menu" = { bg = "#111111" }
+"ui.menu.selected" = "blue"
+"ui.menu.scroll" = { bg = "#333333", fg = "blue" }
+"ui.selection" = { bg = "#333333" }
+"ui.selection.primary" = { bg = "#05428f" }
+"ui.highlight" = { bg = "#333333" }
+"ui.cursorline" = { bg = "#111111" }
+"warning" = "yellow"
+"error" = "red"
+"info" = "blue"
+"hint" = "cyan"
+"diagnostic.hint" = { underline = { color = "cyan", style = "curl" } }
+"diagnostic.info" = { underline = { color = "blue", style = "curl" } }
+"diagnostic.warning" = { underline = { color = "yellow", style = "curl" } }
+"diagnostic.error" = { underline = { color = "red", style = "curl" } }

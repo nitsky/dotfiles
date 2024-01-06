@@ -1,0 +1,99 @@
+[[language]]
+formatter = { command = "prettier", args = ["--parser", "css"] }
+name = "css"
+
+[[language]]
+formatter = { command = "prettier", args = ["--parser", "html"] }
+name = "html"
+
+[[language]]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+name = "javascript"
+
+[[language]]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "json"] }
+name = "json"
+
+[[language]]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "markdown"] }
+name = "markdown"
+
+[[language]]
+auto-format = true
+file-types = ["mdx"]
+formatter = { command = "prettier", args = ["--parser", "mdx"] }
+grammar = "markdown"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["mdx", "eslint", "tailwind"]
+name = "mdx"
+roots = []
+scope = "source.md"
+
+[[language]]
+indent = { tab-width = 2, unit = "\t" }
+name = "rust"
+
+[[language]]
+auto-format = true
+comment-token = "//"
+file-types = ["tg"]
+formatter = { command = "tg" , args = ["fmt"] }
+grammar = "typescript"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["tangram"]
+name = "tangram"
+roots = ["tangram.tg"]
+scope = "source.ts"
+
+[[language]]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "eslint", "tailwind"]
+name = "tsx"
+
+[[language]]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+name = "typescript"
+
+[language-server.eslint]
+args = ["--stdio"]
+command = "vscode-eslint-language-server"
+
+[language-server.eslint.config]
+validate = "on"
+experimental = { useFlatConfig = false }
+rulesCustomizations = []
+run = "onType"
+problems = { shortenToSingleLine = false }
+nodePath = ""
+
+[language-server.eslint.config.codeActionOnSave]
+enable = true
+mode = "fixAll"
+
+[language-server.eslint.config.codeAction]
+[language-server.eslint.config.codeAction.disableRuleComment]
+enable = true
+location = "separateLine"
+
+[language-server.eslint.config.workingDirectory]
+mode = "location"
+
+[language-server.mdx]
+args = ["--stdio"]
+command = "mdx-language-server"
+
+[language-server.rust-analyzer.config]
+checkOnSave = { command = "clippy" } 
+
+[language-server.tailwind]
+args = ["--stdio"]
+command = "tailwindcss-language-server"
+
+[language-server.tangram]
+args = ["lsp"]
+command = "tg"
