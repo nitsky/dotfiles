@@ -2,120 +2,82 @@
 [ -d /opt/homebrew ] && eval $(/opt/homebrew/bin/brew shellenv)
 fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 
-# completions
-autoload -U compinit
-compinit
-
-# rust
-source $HOME/.cargo/env
-
-# orbstack
-source $HOME/.orbstack/shell/init.zsh
+# aliases
+alias b='bun'
+alias c='bat'
+alias code='open -a "Visual Studio Code"'
+alias d='trash'
+alias dotfiles='git --git-dir ~/.dotfiles --work-tree ~/ -c core.fsmonitor=false'
+alias e='hx'
+alias f='fd'
+alias g='git'
+alias j='just'
+alias erc='e ~/.zshrc'
+alias src='source ~/.zshrc'
+alias tree='eza -T'
+alias u='cd ..'
 
 # bun
-[ -s "/Users/nitsky/.bun/_bun" ] && source "/Users/nitsky/.bun/_bun"
+# [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# llvm
-export PATH="$PATH:$HOMEBREW_PREFIX/opt/llvm/bin"
+# fzf
+export FZF_DEFAULT_OPTS="--reverse --exit-0 --select-1 --preview=bat --color=16,fg+:blue,pointer:blue"
+export FZF_DEFAULT_COMMAND="fd --type f --no-ignore"
 
-# docker
-source <(docker completion zsh)
+# gpg
+export GPG_TTY=$(tty)
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+if ! pgrep -q gpg-agent; then
+	gpgconf --launch gpg-agent
+fi
 
-# prompt
-autoload -U colors && colors
-PROMPT="%{$fg[green]%}%B%n@%m%{$reset_color%}:%{$fg[blue]%}%4~%{$reset_color%}
-%{$fg[red]%}%B›%{$reset_color%} "
+# helix
+export HELIX_RUNTIME="$HOME/helix/runtime"
+export PATH="$HOME/helix/target/release:$PATH"
 
 # history
 HISTSIZE=1000000
 SAVEHIST=1000000
-setopt inc_append_history
-setopt share_history
-setopt extended_history
+setopt incappendhistory
+setopt sharehistory
+setopt noextendedhistory
+
+# llvm
+export PATH="$PATH:$HOMEBREW_PREFIX/opt/llvm/bin"
 
 # misc
 export EDITOR="hx"
 export LESS="-R"
 export LESSHISTFILE=/dev/null
-export PGUSER=postgres
 
-# fzf
-export FZF_DEFAULT_OPTS="--reverse --exit-0 --select-1 --preview=bat --color=16,fg+:blue,pointer:blue"
-export FZF_DEFAULT_COMMAND="fd --type f --no-ignore"
-source "$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh"
-source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
- 
-# gpg
-export GPG_TTY=$(tty)
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-gpgconf --launch gpg-agent
+# orbstack
+source $HOME/.orbstack/shell/init.zsh
 
-# aliases
-alias code='open -a "Visual Studio Code"'
-alias d='trash'
-alias e='hx'
-alias f='lf'
-alias g='rg'
-alias j='just'
-alias l='lazygit'
-alias p='bat'
-alias rc='$EDITOR ~/.zshrc'
-alias src='source ~/.zshrc'
-alias t='fd'
-alias tree='eza -T'
-alias u='cd ..'
+# prompt
+autoload -U colors && colors
+PROMPT="%{$fg[green]%}%B%n@%m%{$reset_color%}:%{$fg[blue]%}%4~%{$reset_color%}
+%{$fg[red]%}%B›%{$reset_color%} "
+function set_cursor() {
+	echo -ne "\e[5 q"
+}
+precmd_functions+=(set_cursor)
 
-function weather() {
-	curl -sSL http://wttr.in/$(echo "$@" | tr " " +)
+function mkfile() {
+	mkdir -p "$(dirname "$1")" && touch "$1"
 }
 
-# enable vi mode
-bindkey -v
+# rust
+source $HOME/.cargo/env
 
-# set the cursor
-print -n -- "\e[5 q"
+# tangram
+export PATH="$HOME/.tangram/bin:$PATH"
+# source <(tg shellhook zsh)
+# source <(tg run -p ~/env -- --shell zsh);
 
-# do not wait after hitting escape
+# set key timeout
 KEYTIMEOUT=0
-
-# use the system clipboard
-function copy {
-	zle vi-yank
-	echo "$CUTBUFFER" | pbcopy
-}
-zle -N copy
-bindkey -M vicmd 'y' copy
-function paste_before {
-	CUTBUFFER=$(pbpaste)
-	zle vi-put-before
-}
-zle -N paste_before
-bindkey -M vicmd 'P' paste_before
-function paste_after {
-	CUTBUFFER=$(pbpaste)
-	zle vi-put-after
-}
-zle -N paste_after
-bindkey -M vicmd 'p' paste_after
-
-# set cursor based on keymap
-function zle-line-init {
-	print -n -- "\e[5 q"
-}
-function zle-keymap-select {
-	case $KEYMAP in
-		main) print -n -- "\e[5 q";;
-		vicmd) print -n -- "\e[0 q";;
-	esac
-}
-function zle-line-finish {
-	print -n -- "\e[0 q"
-}
-zle -N zle-line-init
-zle -N zle-line-finish
-zle -N zle-keymap-select
 
 # set highlight colors
 zle_highlight=(region:bg=#05428f;paste:bg=none)
@@ -123,55 +85,91 @@ zle_highlight=(region:bg=#05428f;paste:bg=none)
 # enable binding of ^s
 stty -ixon
 
-# g followed by s or l to move to the beginning and end of a line.
-bindkey -M vicmd 'g s' beginning-of-line
-bindkey -M vicmd 'g l' end-of-line
-
-# fix space issue with tab completion
+# never remove completion suffix
 ZLE_REMOVE_SUFFIX_CHARS=""
 
-# ctrl f to clear screen
-bindkey ^f clear-screen
-bindkey -M vicmd ^f clear-screen
+# ctrl e for hx
+function hx_widget() {
+	hx
+	set_cursor
+	zle reset-prompt
+}
+zle -N hx_widget
+bindkey ^e hx_widget
 
-# ctrl e to edit command
+# ctrl f for lf
+function lf_widget() {
+	cd $(lf -print-last-dir)
+	set_cursor
+	zle reset-prompt
+}
+zle -N lf_widget
+bindkey ^f lf_widget
+
+# # ctrl g for gitui
+# function gitui_widget() {
+# 	gitui < $TTY
+# 	set_cursor
+# 	zle reset-prompt
+# }
+# zle -N gitui_widget
+# bindkey ^g gitui_widget
+
+# # ctrl g for git status
+# function git_widget() {
+# 	git status --short --branch | bat --color always
+# 	zle reset-prompt
+# }
+# zle -N git_widget
+# bindkey ^g git_widget
+
+# ctrl g for search
+function search_widget() {
+	SEARCH_COMMAND="rg --color=always --column --line-number --multiline --no-heading --smart-case --with-filename {q}"
+	rm -f /tmp/{r,f};
+	fzf \
+		--ansi \
+		--bind "change:reload:sleep 0.1; ${SEARCH_COMMAND} || true" \
+		--bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(f > )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/r; cat /tmp/f)" \
+		--bind "ctrl-r:unbind(ctrl-r)+change-prompt(r > )+disable-search+reload(${SEARCH_COMMAND})+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/f; cat /tmp/r)" \
+		--bind "start:reload(${SEARCH_COMMAND})+unbind(ctrl-r)" \
+		--delimiter ":" \
+		--disabled \
+		--preview "bat --color always --highlight-line {2} {1}" \
+		--preview-window "+{2}-5" \
+		--prompt "r > " < $TTY
+}
+zle -N search_widget
+bindkey ^g search_widget
+
+# ctrl r for history
+function history_widget() {
+	LBUFFER=$(fc -lnr 1 | fzf --height "-50%" --query "$BUFFER")
+	set_cursor
+	zle reset-prompt
+}
+zle -N history_widget
+bindkey ^r history_widget
+
+# ctrl s to edit command
 autoload edit-command-line
 zle -N edit-command-line
-bindkey ^e edit-command-line
-bindkey -M vicmd ^e edit-command-line
-
-# ctrl o to cd
-function cd_widget () {
-	echo
-	cd $(lf -print-last-dir)
-	echo
+function custom-edit-command-line() {
+	zle edit-command-line
+	set_cursor
 	zle reset-prompt
 }
-zle -N cd_widget
-bindkey ^o cd_widget
-bindkey -M vicmd ^o cd_widget
+zle -N custom-edit-command-line
+bindkey ^s custom-edit-command-line
 
-# ctrl s to list files
-function list_widget() {
-	echo
-	pwd && eza --long --header --all --group-directories-first
-	echo
+# ctrl t for files
+function files_widget() {
+	LBUFFER="${LBUFFER}$(fd | fzf --height "-50%")"
+	set_cursor
 	zle reset-prompt
 }
-zle -N list_widget
-bindkey ^s list_widget
-bindkey -M vicmd ^s list_widget
-
-# ctrl g to show git status
-function git_widget() {
-	echo
-	git status --short --branch
-	echo
-	zle reset-prompt
-}
-zle -N git_widget
-bindkey ^g git_widget
-bindkey -M vicmd ^g git_widget
+zle -N files_widget
+bindkey ^t files_widget
 
 # ctrl w or ctrl q to exit
 function exit_widget() {
@@ -180,5 +178,10 @@ function exit_widget() {
 zle -N exit_widget
 bindkey ^w exit_widget
 bindkey ^q exit_widget
-bindkey -M vicmd ^w exit_widget
-bindkey -M vicmd ^q exit_widget
+
+# bun completions
+[ -s "/Users/nitsky/.bun/_bun" ] && source "/Users/nitsky/.bun/_bun"
+
+# grit
+export GRIT_INSTALL="$HOME/.grit"
+export PATH="$GRIT_INSTALL/bin:$PATH"

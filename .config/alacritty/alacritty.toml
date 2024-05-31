@@ -1,22 +1,22 @@
 [colors.bright]
 black = "0x444444"
-blue = "0x0a84ff"
-cyan = "0x64d3ff"
-green = "0x30d158"
-magenta = "0xbf5af2"
 red = "0xff443a"
-white = "0xdddddd"
+green = "0x30d158"
 yellow = "0xffd60a"
+blue = "0x0a84ff"
+magenta = "0xbf5af2"
+cyan = "0x64d3ff"
+white = "0xdddddd"
 
 [colors.normal]
 black = "0x000000"
-blue = "0x0a84ff"
-cyan = "0x64d3ff"
-green = "0x30d158"
-magenta = "0xbf5af2"
 red = "0xff443a"
-white = "0xffffff"
+green = "0x30d158"
 yellow = "0xffd60a"
+blue = "0x0a84ff"
+magenta = "0xbf5af2"
+cyan = "0x64d3ff"
+white = "0xffffff"
 
 [colors.primary]
 background = "0x000000"
@@ -25,20 +25,8 @@ foreground = "0xdddddd"
 [font]
 size = 16.0
 
-[font.glyph_offset]
-x = 0
-y = 0
-
 [font.normal]
 family = "JetBrainsMono Nerd Font Mono"
-
-[font.offset]
-x = 0
-y = 2
-
-[[hints.enabled]]
-command = "open"
-hyperlinks = true
 
 [window]
 decorations = "None"
@@ -46,5 +34,5 @@ option_as_alt = "Both"
 startup_mode = "Maximized"
 
 [window.padding]
-x = 8
-y = 8
+x = 2
+y = 2

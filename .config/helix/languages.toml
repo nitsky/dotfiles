@@ -8,13 +8,20 @@ name = "html"
 
 [[language]]
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"] }
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome"]
 name = "javascript"
 
 [[language]]
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "json"] }
+formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.json"] }
+language-servers = [{ except-features = ["format"], name = "vscode-json-language-server" }, "biome"]
 name = "json"
+
+[[language]]
+auto-format = true
+formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.jsx"] }
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
+name = "jsx"
 
 [[language]]
 auto-format = true
@@ -30,7 +37,7 @@ indent = { tab-width = 2, unit = "\t" }
 language-servers = ["mdx", "eslint", "tailwind"]
 name = "mdx"
 roots = []
-scope = "source.md"
+scope = "source.mdx"
 
 [[language]]
 indent = { tab-width = 2, unit = "\t" }
@@ -39,25 +46,42 @@ name = "rust"
 [[language]]
 auto-format = true
 comment-token = "//"
-file-types = ["tg"]
-formatter = { command = "tg" , args = ["fmt"] }
-grammar = "typescript"
+file-types = [{ glob = "tangram.js" }, { glob = "*.tg.js" }]
+formatter = { command = "tg" , args = ["-m", "client", "format", "--stdio"] }
+grammar = "javascript"
 indent = { tab-width = 2, unit = "\t" }
 language-servers = ["tangram"]
-name = "tangram"
-roots = ["tangram.tg"]
-scope = "source.ts"
+name = "tangram-javascript"
+roots = []
+scope = "source.tangram-javascript"
 
 [[language]]
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"] }
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "eslint", "tailwind"]
+comment-token = "//"
+file-types = [{ glob = "tangram.ts" }, { glob = "*.tg.ts" }]
+formatter = { command = "tg" , args = ["-m", "client", "format", "--stdio"] }
+grammar = "typescript"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["tangram"]
+name = "tangram-typescript"
+roots = ["tangram.ts"]
+scope = "source.tangram-typescript"
+
+[[language]]
+auto-format = true
+formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.tsx"] }
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "tsx"
 
 [[language]]
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "typescript"] }
+formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.ts"] }
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "typescript"
+
+[language-server.biome]
+args = ["lsp-proxy"]
+command = "biome"
 
 [language-server.eslint]
 args = ["--stdio"]
@@ -88,12 +112,12 @@ args = ["--stdio"]
 command = "mdx-language-server"
 
 [language-server.rust-analyzer.config]
-checkOnSave = { command = "clippy" } 
+check = { command = "clippy", extraArgs = ["-p", "tangram_client"] }
 
 [language-server.tailwind]
 args = ["--stdio"]
 command = "tailwindcss-language-server"
 
 [language-server.tangram]
-args = ["lsp"]
+args = ["-m", "client", "lsp"]
 command = "tg"

@@ -1,28 +1,47 @@
 [alias]
+a = "add"
+b = "branch"
+c = "commit"
+ca = "commit -a"
+cam = "commit -am"
+ch = "checkout"
+cm = "commit -m"
+d = "diff"
+f = "fetch"
+fap = "fetch -ap"
 l = "log --all --graph --decorate --abbrev-commit --format=format:'%C(bold blue)%h%C(reset) - %C(bold white)%an%C(reset) %C(bold yellow)%d%C(reset)%n%C(bold cyan)%aD%C(reset) - %C(bold green)(%ar)%C(reset)%n%C(white)%s%C(reset)'"
+m = "merge"
+p = "pull"
+pl = "pull"
+ps = "push"
+r = "rebase"
+rs = "reset"
+s = "status --short --branch"
+sh = "show"
+st = "stash"
+sw = "switch"
 
 [commit]
 gpgSign = true
 
 [core]
-# fsmonitor = true
+fsmonitor = true
 pager = "delta"
 untrackedcache = true
 
 [delta]
 line-numbers = true
-minus-emph-style = "normal #880000"
-minus-style = "normal #440000"
+minus-emph-style = "syntax #880000"
+minus-style = "syntax  #440000"
 navigate = true
-plus-emph-style = "normal #008800"
-plus-style = "normal #004400"
-# side-by-side = true
-syntax-theme = "base16"
+plus-emph-style = "syntax #008800"
+plus-style = "syntax #004400"
+side-by-side = true
 tabs = 2
 
 [diff]
-colorMoved = "default"
 compactionHeuristic = true
+# external = "difft"
 
 [init]
 defaultBranch = "main"

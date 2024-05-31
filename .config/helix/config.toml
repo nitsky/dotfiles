@@ -13,7 +13,6 @@ character = "│"
 render = true
 
 [editor.lsp]
-# display-inlay-hints = true
 display-messages = true
 
 [editor.smart-tab]
@@ -90,6 +89,7 @@ t = "goto_next_class"
 "C-j" = "goto_next_paragraph"
 "C-k" = "goto_prev_paragraph"
 "C-l" = "goto_next_buffer"
+"C-s" = ":w"
 G = "goto_last_line"
 H = "select_prev_sibling"
 J = "shrink_selection"

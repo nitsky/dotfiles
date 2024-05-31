@@ -6,14 +6,13 @@ set period 1
 map <c-q> :quit
 map <c-w> :quit
 map <esc> :unselect; clear
-map <space> :toggle
 map A :push %mkdir<space>
 map H :cd ~/
-map R :push %rm<space>-rf<space>"$fx"
+map D :push %rm<space>-rf<space>"$fx"
 map a :push %touch<space>
 map ge :bottom
 map i :set hidden!
-map r :push %trash<space>"$fx"
+map d :push %trash<space>"$fx"
 map x :cut
 
 cmd extract ${{

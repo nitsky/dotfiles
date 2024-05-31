@@ -1,0 +1,38 @@
+font-family = JetBrainsMono Nerd Font Mono
+font-feature = -calt
+font-feature = -dlig
+font-feature = -liga
+font-size = 16
+font-thicken = true
+
+macos-option-as-alt = true
+macos-titlebar-tabs = true
+
+keybind = alt+h=goto_split:left
+keybind = alt+j=goto_split:bottom
+keybind = alt+k=goto_split:top
+keybind = alt+l=goto_split:right
+keybind = alt+n=new_split:right
+keybind = alt+shift+n=new_split:down
+keybind = alt+w=close_surface
+
+background = 000000
+foreground = dddddd
+
+palette = 0=#000000
+palette = 1=#ff443a
+palette = 2=#30d158
+palette = 3=#ffd60a
+palette = 4=#0a84ff
+palette = 5=#bf5af2
+palette = 6=#64d3ff
+palette = 7=#ffffff
+
+palette = 8=#444444
+palette = 9=#ff443a
+palette = 10=#30d158
+palette = 11=#ffd60a
+palette = 12=#0a84ff
+palette = 13=#bf5af2
+palette = 14=#64d3ff
+palette = 15=#dddddd
