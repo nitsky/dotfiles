@@ -4,6 +4,7 @@ theme = "tangram"
 bufferline = "always"
 color-modes = true
 cursorline = true
+end-of-line-diagnostics = "warning"
 
 [editor.cursor-shape]
 insert = "bar"
@@ -11,6 +12,9 @@ insert = "bar"
 [editor.indent-guides]
 character = "│"
 render = true
+
+[editor.inline-diagnostics]
+cursor-line = "hint"
 
 [editor.lsp]
 display-messages = true

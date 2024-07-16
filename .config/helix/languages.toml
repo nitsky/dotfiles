@@ -47,7 +47,6 @@ name = "rust"
 auto-format = true
 comment-token = "//"
 file-types = [{ glob = "tangram.js" }, { glob = "*.tg.js" }]
-formatter = { command = "tg" , args = ["-m", "client", "format", "--stdio"] }
 grammar = "javascript"
 indent = { tab-width = 2, unit = "\t" }
 language-servers = ["tangram"]
@@ -59,7 +58,6 @@ scope = "source.tangram-javascript"
 auto-format = true
 comment-token = "//"
 file-types = [{ glob = "tangram.ts" }, { glob = "*.tg.ts" }]
-formatter = { command = "tg" , args = ["-m", "client", "format", "--stdio"] }
 grammar = "typescript"
 indent = { tab-width = 2, unit = "\t" }
 language-servers = ["tangram"]
@@ -112,12 +110,11 @@ args = ["--stdio"]
 command = "mdx-language-server"
 
 [language-server.rust-analyzer.config]
-check = { command = "clippy", extraArgs = ["-p", "tangram_client"] }
+check = { command = "clippy" }
 
-[language-server.tailwind]
 args = ["--stdio"]
 command = "tailwindcss-language-server"
 
 [language-server.tangram]
-args = ["-m", "client", "lsp"]
+args = ["lsp"]
 command = "tg"

@@ -6,7 +6,7 @@ font-size = 16
 font-thicken = true
 
 macos-option-as-alt = true
-macos-titlebar-tabs = true
+macos-titlebar-style = tabs
 
 keybind = alt+h=goto_split:left
 keybind = alt+j=goto_split:bottom

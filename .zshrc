@@ -4,6 +4,7 @@ fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 
 # aliases
 alias b='bun'
+alias bx='bunx'
 alias c='bat'
 alias code='open -a "Visual Studio Code"'
 alias d='trash'
@@ -11,7 +12,7 @@ alias dotfiles='git --git-dir ~/.dotfiles --work-tree ~/ -c core.fsmonitor=false
 alias e='hx'
 alias f='fd'
 alias g='git'
-alias j='just'
+alias h='xh'
 alias erc='e ~/.zshrc'
 alias src='source ~/.zshrc'
 alias tree='eza -T'
@@ -21,6 +22,11 @@ alias u='cd ..'
 # [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# fly
+autoload -U compinit; compinit
+flyctl completion zsh > "${fpath[1]}/_flyctl"
+compdef _flyctl fly
 
 # fzf
 export FZF_DEFAULT_OPTS="--reverse --exit-0 --select-1 --preview=bat --color=16,fg+:blue,pointer:blue"
@@ -88,14 +94,14 @@ stty -ixon
 # never remove completion suffix
 ZLE_REMOVE_SUFFIX_CHARS=""
 
-# ctrl e for hx
+# ctrl o for hx
 function hx_widget() {
 	hx
 	set_cursor
 	zle reset-prompt
 }
 zle -N hx_widget
-bindkey ^e hx_widget
+bindkey ^o hx_widget
 
 # ctrl f for lf
 function lf_widget() {
