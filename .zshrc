@@ -21,7 +21,7 @@ alias u='cd ..'
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-# [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
 
 # fly
 autoload -U compinit; compinit
@@ -186,7 +186,3 @@ function exit_widget() {
 zle -N exit_widget
 bindkey ^w exit_widget
 bindkey ^q exit_widget
-
-
-# bun completions
-[ -s "/Users/nitsky/.bun/_bun" ] && source "/Users/nitsky/.bun/_bun"
