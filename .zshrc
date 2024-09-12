@@ -19,9 +19,9 @@ alias tree='eza -T'
 alias u='cd ..'
 
 # bun
-# [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+# [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
 
 # fly
 autoload -U compinit; compinit
@@ -136,13 +136,15 @@ function search_widget() {
 	fzf \
 		--ansi \
 		--bind "change:reload:sleep 0.1; ${SEARCH_COMMAND} || true" \
+		--bind "ctrl-p:toggle-preview" \
+		--bind "ctrl-v:change-preview-window(down|right)" \
 		--bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(f > )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/r; cat /tmp/f)" \
 		--bind "ctrl-r:unbind(ctrl-r)+change-prompt(r > )+disable-search+reload(${SEARCH_COMMAND})+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/f; cat /tmp/r)" \
 		--bind "start:reload(${SEARCH_COMMAND})+unbind(ctrl-r)" \
 		--delimiter ":" \
 		--disabled \
 		--preview "bat --color always --highlight-line {2} {1}" \
-		--preview-window "+{2}-5" \
+		--preview-window "right" \
 		--prompt "r > " < $TTY
 }
 zle -N search_widget
@@ -185,9 +187,6 @@ zle -N exit_widget
 bindkey ^w exit_widget
 bindkey ^q exit_widget
 
+
 # bun completions
 [ -s "/Users/nitsky/.bun/_bun" ] && source "/Users/nitsky/.bun/_bun"
-
-# grit
-export GRIT_INSTALL="$HOME/.grit"
-export PATH="$GRIT_INSTALL/bin:$PATH"
