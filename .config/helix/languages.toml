@@ -13,13 +13,11 @@ name = "javascript"
 
 [[language]]
 auto-format = true
-formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.json"] }
 language-servers = [{ except-features = ["format"], name = "vscode-json-language-server" }, "biome"]
 name = "json"
 
 [[language]]
 auto-format = true
-formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.jsx"] }
 language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "jsx"
 
@@ -67,13 +65,11 @@ scope = "source.tangram-typescript"
 
 [[language]]
 auto-format = true
-formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.tsx"] }
 language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "tsx"
 
 [[language]]
 auto-format = true
-formatter = { command = "biome", args = ["check", "--apply", "--stdin-file-path", "file.ts"] }
 language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "typescript"
 
@@ -97,7 +93,6 @@ nodePath = ""
 enable = true
 mode = "fixAll"
 
-[language-server.eslint.config.codeAction]
 [language-server.eslint.config.codeAction.disableRuleComment]
 enable = true
 location = "separateLine"
@@ -112,6 +107,7 @@ command = "mdx-language-server"
 [language-server.rust-analyzer.config]
 check = { command = "clippy" }
 
+[language-server.tailwind]
 args = ["--stdio"]
 command = "tailwindcss-language-server"
 
