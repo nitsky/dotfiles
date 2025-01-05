@@ -1,3 +1,5 @@
+export PATH="$HOME/.local/bin:$PATH"
+
 # homebrew
 [ -d /opt/homebrew ] && eval $(/opt/homebrew/bin/brew shellenv)
 fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
@@ -143,7 +145,7 @@ function search_widget() {
 		--bind "start:reload(${SEARCH_COMMAND})+unbind(ctrl-r)" \
 		--delimiter ":" \
 		--disabled \
-		--preview "bat --color always --highlight-line {2} {1}" \
+		--preview "bat --color always --highlight-line {2} --pager 'less -FR +{2}' {1}" \
 		--preview-window "right" \
 		--prompt "r > " < $TTY
 }
@@ -179,10 +181,15 @@ function files_widget() {
 zle -N files_widget
 bindkey ^t files_widget
 
-# ctrl w or ctrl q to exit
+# ctrl q to exit
 function exit_widget() {
 	exit
 }
 zle -N exit_widget
-bindkey ^w exit_widget
 bindkey ^q exit_widget
+
+# bun completions
+[ -s "/Users/nitsky/.bun/_bun" ] && source "/Users/nitsky/.bun/_bun"
+
+# Added by Windsurf
+export PATH="/Users/nitsky/.codeium/windsurf/bin:$PATH"

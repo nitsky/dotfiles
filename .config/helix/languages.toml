@@ -60,7 +60,7 @@ grammar = "typescript"
 indent = { tab-width = 2, unit = "\t" }
 language-servers = ["tangram"]
 name = "tangram-typescript"
-roots = ["tangram.ts"]
+roots = []
 scope = "source.tangram-typescript"
 
 [[language]]
@@ -113,4 +113,4 @@ command = "tailwindcss-language-server"
 
 [language-server.tangram]
 args = ["lsp"]
-command = "tg"
+command = "tangram"
