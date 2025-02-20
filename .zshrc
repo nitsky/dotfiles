@@ -48,9 +48,10 @@ export PATH="$HOME/helix/target/release:$PATH"
 # history
 HISTSIZE=1000000
 SAVEHIST=1000000
+setopt inc_append_history_time
 setopt incappendhistory
-setopt sharehistory
 setopt noextendedhistory
+setopt sharehistory
 
 # llvm
 export PATH="$PATH:$HOMEBREW_PREFIX/opt/llvm/bin"
@@ -81,8 +82,6 @@ source $HOME/.cargo/env
 
 # tangram
 export PATH="$HOME/.tangram/bin:$PATH"
-# source <(tg shellhook zsh)
-# source <(tg run -p ~/env -- --shell zsh);
 
 # set key timeout
 KEYTIMEOUT=0

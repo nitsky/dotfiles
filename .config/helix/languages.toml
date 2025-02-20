@@ -65,7 +65,7 @@ scope = "source.tangram-typescript"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
+# language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "tsx"
 
 [[language]]

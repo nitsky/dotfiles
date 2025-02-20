@@ -2,6 +2,7 @@ theme = "tangram"
 
 [editor]
 bufferline = "always"
+clipboard-provider = "pasteboard"
 color-modes = true
 cursorline = true
 end-of-line-diagnostics = "warning"

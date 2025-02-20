@@ -1,48 +1,30 @@
 {
-    "profiles": [
-        {
-            "complex_modifications": {
-                "rules": [
-                    {
-                        "description": "Change caps lock to escape on tap, control on hold.",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_control" }],
-                                "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Change option-tab to command-tab.",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "tab",
-                                    "modifiers": { "mandatory": ["option"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "tab",
-                                        "modifiers": ["command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    }
-                ]
-            },
-            "name": "default",
-            "selected": true,
-            "virtual_hid_keyboard": {
-                "country_code": 0,
-                "keyboard_type_v2": "ansi"
-            }
-        }
-    ]
+	"profiles": [
+		{
+			"complex_modifications": {
+				"rules": [
+					{
+						"description": "Change caps lock to escape on tap, control on hold.",
+						"manipulators": [
+							{
+								"from": {
+									"key_code": "caps_lock",
+									"modifiers": { "optional": ["any"] }
+								},
+								"to": [{ "key_code": "left_control" }],
+								"to_if_alone": [{ "key_code": "escape" }],
+								"type": "basic"
+							}
+						]
+					}
+				]
+			},
+			"name": "default",
+			"selected": true,
+			"virtual_hid_keyboard": {
+				"country_code": 0,
+				"keyboard_type_v2": "ansi"
+			}
+		}
+	]
 }
