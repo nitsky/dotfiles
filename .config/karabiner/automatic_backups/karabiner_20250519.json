@@ -19,16 +19,6 @@
 					}
 				]
 			},
-			"devices": [
-				{
-					"identifiers": {
-						"is_keyboard": true,
-						"product_id": 6519,
-						"vendor_id": 12951
-					},
-					"ignore": true
-				}
-			],
 			"name": "default",
 			"selected": true,
 			"virtual_hid_keyboard": {

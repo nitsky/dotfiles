@@ -1,5 +1,8 @@
 export PATH="$HOME/.local/bin:$PATH"
 
+# secrets
+source ~/.secrets
+
 # homebrew
 [ -d /opt/homebrew ] && eval $(/opt/homebrew/bin/brew shellenv)
 fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
@@ -9,12 +12,13 @@ alias b='bun'
 alias bx='bunx'
 alias c='bat'
 alias code='open -a "Visual Studio Code"'
-alias d='trash'
+alias d='docker'
 alias dotfiles='git --git-dir ~/.dotfiles --work-tree ~/ -c core.fsmonitor=false'
 alias e='hx'
 alias f='fd'
 alias g='git'
 alias h='xh'
+alias k='kubectl'
 alias erc='e ~/.zshrc'
 alias src='source ~/.zshrc'
 alias tree='eza -T'
