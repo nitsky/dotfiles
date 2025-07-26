@@ -65,7 +65,7 @@ scope = "source.tangram-typescript"
 
 [[language]]
 auto-format = true
-# language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
 name = "tsx"
 
 [[language]]
@@ -105,6 +105,7 @@ args = ["--stdio"]
 command = "mdx-language-server"
 
 [language-server.rust-analyzer.config]
+cargo = { features = "all" }
 check = { command = "clippy" }
 
 [language-server.tailwind]
@@ -112,5 +113,5 @@ args = ["--stdio"]
 command = "tailwindcss-language-server"
 
 [language-server.tangram]
-args = ["lsp"]
+args = ["-m", "client", "lsp"]
 command = "tangram"

@@ -1,3 +1,6 @@
+command = /opt/homebrew/bin/nu
+term = xterm-256color
+
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt
 font-feature = -dlig
@@ -7,6 +10,8 @@ font-thicken = true
 
 macos-option-as-alt = true
 macos-titlebar-style = tabs
+
+keybind = shift+enter=text:\n
 
 background = 000000
 foreground = dddddd

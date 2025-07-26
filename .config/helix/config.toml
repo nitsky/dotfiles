@@ -6,6 +6,7 @@ clipboard-provider = "pasteboard"
 color-modes = true
 cursorline = true
 end-of-line-diagnostics = "warning"
+shell = ["nu", "--stdin", "-c"]
 
 [editor.cursor-shape]
 insert = "bar"
