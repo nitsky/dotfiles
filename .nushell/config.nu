@@ -20,11 +20,13 @@ alias dotfiles = git --git-dir ~/.dotfiles --work-tree ~/ -c core.fsmonitor=fals
 alias e = hx
 alias f = fd
 alias g = git
+alias j = jj
 alias l = lf
 alias k = kubectl
+alias time = timeit
 alias tree = eza -T
 alias u = cd ..
-alias zed = ^open -a "Visual Studio Code"
+alias zed = ^open -a "Zed"
 
 # banner
 $env.config.show_banner = false
@@ -44,8 +46,8 @@ $env.FZF_DEFAULT_OPTS = "--reverse --exit-0 --select-1 --preview=bat --color=16,
 $env.FZF_DEFAULT_COMMAND = "fd --type f --no-ignore"
 
 # gpg
-$env.GPG_TTY = ^tty
-$env.SSH_AUTH_SOCK = ^gpgconf --list-dirs agent-ssh-socket
+$env.GPG_TTY = (tty)
+$env.SSH_AUTH_SOCK = (gpgconf --list-dirs agent-ssh-socket)
 if ((pgrep -q gpg-agent | complete | get exit_code) == 0) {
 	gpgconf --launch gpg-agent
 }
@@ -93,6 +95,9 @@ open ~/.secrets | from toml | load-env
 # tangram
 path add ~/tangram/target/release
 alias tg = tangram
+alias tgd = ./target/debug/tangram -m client
+alias tgr = ./target/release/tangram -m client
+alias tgo = orb ./target/aarch64-unknown-linux-gnu/release/tangram
 
 # ctrl f for lf
 $env.config.keybindings ++= [{

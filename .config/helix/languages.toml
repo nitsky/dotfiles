@@ -1,5 +1,6 @@
 [[language]]
 formatter = { command = "prettier", args = ["--parser", "css"] }
+language-servers = ["tailwind", "biome"]
 name = "css"
 
 [[language]]
@@ -114,4 +115,4 @@ command = "tailwindcss-language-server"
 
 [language-server.tangram]
 args = ["-m", "client", "lsp"]
-command = "tangram"
+command = "/Users/nitsky/tangram/target/debug/tangram"

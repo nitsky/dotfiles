@@ -36,7 +36,7 @@ minus-style = "syntax  #440000"
 navigate = true
 plus-emph-style = "syntax #008800"
 plus-style = "syntax #004400"
-side-by-side = true
+side-by-side = false
 tabs = 2
 
 [diff]
