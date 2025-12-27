@@ -1,30 +1,29 @@
 [[language]]
-formatter = { command = "prettier", args = ["--parser", "css"] }
-language-servers = ["tailwind", "biome"]
+language-servers = ["oxfmt", "oxlint", "tailwind"]
 name = "css"
 
 [[language]]
-formatter = { command = "prettier", args = ["--parser", "html"] }
+language-servers = ["oxfmt", "oxlint", "tailwind"]
 name = "html"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome"]
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint"]
 name = "javascript"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "vscode-json-language-server" }, "biome"]
+language-servers = ["oxfmt", "oxlint"]
 name = "json"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint", "tailwind"]
 name = "jsx"
 
 [[language]]
 auto-format = true
-formatter = { command = "prettier", args = ["--parser", "markdown"] }
+language-servers = ["oxfmt", "oxlint"]
 name = "markdown"
 
 [[language]]
@@ -33,7 +32,7 @@ file-types = ["mdx"]
 formatter = { command = "prettier", args = ["--parser", "mdx"] }
 grammar = "markdown"
 indent = { tab-width = 2, unit = "\t" }
-language-servers = ["mdx", "eslint", "tailwind"]
+language-servers = ["mdx", "oxfmt", "oxlint", "tailwind"]
 name = "mdx"
 roots = []
 scope = "source.mdx"
@@ -66,44 +65,25 @@ scope = "source.tangram-typescript"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint", "tailwind"]
 name = "tsx"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "biome", "eslint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint", "tailwind"]
 name = "typescript"
-
-[language-server.biome]
-args = ["lsp-proxy"]
-command = "biome"
-
-[language-server.eslint]
-args = ["--stdio"]
-command = "vscode-eslint-language-server"
-
-[language-server.eslint.config]
-validate = "on"
-experimental = { useFlatConfig = false }
-rulesCustomizations = []
-run = "onType"
-problems = { shortenToSingleLine = false }
-nodePath = ""
-
-[language-server.eslint.config.codeActionOnSave]
-enable = true
-mode = "fixAll"
-
-[language-server.eslint.config.codeAction.disableRuleComment]
-enable = true
-location = "separateLine"
-
-[language-server.eslint.config.workingDirectory]
-mode = "location"
 
 [language-server.mdx]
 args = ["--stdio"]
 command = "mdx-language-server"
+
+[language-server.oxfmt]
+args = ["oxfmt", "--lsp"]
+command = "bunx"
+
+[language-server.oxlint]
+args = ["oxlint", "--lsp"]
+command = "bunx"
 
 [language-server.rust-analyzer.config]
 cargo = { features = "all" }
@@ -115,4 +95,4 @@ command = "tailwindcss-language-server"
 
 [language-server.tangram]
 args = ["-m", "client", "lsp"]
-command = "/Users/nitsky/tangram/target/debug/tangram"
+command = "tangram"

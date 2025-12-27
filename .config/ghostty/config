@@ -1,4 +1,4 @@
-command = /opt/homebrew/bin/nu
+command = /Users/nitsky/nushell/target/release/nu
 
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt

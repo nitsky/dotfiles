@@ -104,6 +104,7 @@ t = "goto_next_class"
 "C-r" = ":reload"
 "C-s" = ":w"
 "C-w" = ":bc"
+"C-y" = ':sh echo "%{buffer_name}:%{selection_line_start}-%{selection_line_end}" | pbcopy'
 "left" = "jump_backward"
 "right" = "jump_forward"
 G = "goto_last_line"

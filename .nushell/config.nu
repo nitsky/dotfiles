@@ -8,6 +8,7 @@ path add ~/.bun/bin
 path add ~/.cargo/bin
 path add ~/.orbstack/bin
 path add ~/helix/target/release
+path add ~/nushell/target/release
 path add ~/.local/bin
 
 # aliases
@@ -73,17 +74,17 @@ $env.config.history.isolation = true
 
 # prompt
 $env.PROMPT_COMMAND = {
-  let user = $"(ansi green)(whoami)(ansi reset)"
-  let hostname = $"(ansi green)(sys host | get hostname)(ansi reset)"
-  let cwd = $"(ansi blue)($env.PWD | str replace $env.HOME "~")(ansi reset)"
-  let git = try {
-    let branch = (git rev-parse --abbrev-ref HEAD e> /dev/null | str trim)
-    let hash = (git rev-parse --short HEAD e> /dev/null | str trim)
-    $" (ansi cyan)($branch):($hash)(ansi reset)"
-  } catch { "" }
-  let exit = $" (if $env.LAST_EXIT_CODE == 0 { ansi green } else { ansi red })($env.LAST_EXIT_CODE)(ansi reset)";
-  let duration = $" (if ($"($env.CMD_DURATION_MS)ms" | into duration) < 1sec { ansi green } else { ansi red })($"($env.CMD_DURATION_MS)ms" | into duration)(ansi reset)";
-  $"($user)@($hostname):($cwd)($git)($exit)($duration)\n"
+	let user = $"(ansi green)(whoami)(ansi reset)"
+	let hostname = $"(ansi green)(sys host | get hostname)(ansi reset)"
+	let cwd = $"(ansi blue)($env.PWD | str replace $env.HOME "~")(ansi reset)"
+	let git = try {
+		let branch = (git rev-parse --abbrev-ref HEAD e> /dev/null | str trim)
+		let hash = (git rev-parse --short HEAD e> /dev/null | str trim)
+		$" (ansi cyan)($branch):($hash)(ansi reset)"
+	} catch { "" }
+	let exit = $" (if $env.LAST_EXIT_CODE == 0 { ansi green } else { ansi red })($env.LAST_EXIT_CODE)(ansi reset)";
+	let duration = $" (if ($"($env.CMD_DURATION_MS)ms" | into duration) < 1sec { ansi green } else { ansi red })($"($env.CMD_DURATION_MS)ms" | into duration)(ansi reset)";
+	$"($user)@($hostname):($cwd)($git)($exit)($duration)\n"
 };
 $env.PROMPT_COMMAND_RIGHT = ""
 $env.PROMPT_INDICATOR = $"(ansi red)➜(ansi reset) "
@@ -93,7 +94,7 @@ $env.PROMPT_MULTILINE_INDICATOR = $"(ansi red)•(ansi reset) "
 open ~/.secrets | from toml | load-env
 
 # tangram
-path add ~/tangram/target/release
+path add ./target/release
 alias tg = tangram
 alias tgd = ./target/debug/tangram -m client
 alias tgr = ./target/release/tangram -m client
@@ -101,99 +102,99 @@ alias tgo = orb ./target/aarch64-unknown-linux-gnu/release/tangram
 
 # ctrl f for lf
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_f
-  mode: emacs
-  event: {
-    send: executehostcommand,
-    cmd: `
-      cd (lf -print-last-dir)
-    `
-  }
+	modifier: control
+	keycode: char_f
+	mode: emacs
+	event: {
+		send: executehostcommand,
+		cmd: `
+			cd (lf -print-last-dir)
+		`
+	}
 }]
 
 # ctrl g for search
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_g
-  mode: emacs
-  event: {
-    send: executehostcommand,
-    cmd: `
-      tv text
-    `
-  }
+	modifier: control
+	keycode: char_g
+	mode: emacs
+	event: {
+		send: executehostcommand,
+		cmd: `
+			tv text
+		`
+	}
 }]
 
 # ctrl o for hx
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_o
-  mode: emacs
-  event: {
-    send: executehostcommand,
-    cmd: `
-      hx
-    `
-  }
+	modifier: control
+	keycode: char_o
+	mode: emacs
+	event: {
+		send: executehostcommand,
+		cmd: `
+			hx
+		`
+	}
 }]
 
 # ctrl q to exit
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_q
-  mode: emacs
-  event: {
-    send: executehostcommand,
-    cmd: '
-      exit
-    '
-  }
+	modifier: control
+	keycode: char_q
+	mode: emacs
+	event: {
+		send: executehostcommand,
+		cmd: '
+			exit
+		'
+	}
 }]
 
 # ctrl r for history
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_r
-  mode: emacs
-  event: {
-    send: executehostcommand,
-    cmd: '
-      commandline edit (history | get command | to text | tv --inline --no-remote -i (commandline))
-    '
-  }
+	modifier: control
+	keycode: char_r
+	mode: emacs
+	event: {
+		send: executehostcommand,
+		cmd: '
+			commandline edit (history | get command | to text | tv --inline --no-remote -i (commandline))
+		'
+	}
 }]
 
 # ctrl s to edit the commandline
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_s
-  mode: emacs
-  event: { send: "openeditor" }
+	modifier: control
+	keycode: char_s
+	mode: emacs
+	event: { send: "openeditor" }
 }]
 
 # ctrl t for files
 $env.config.keybindings ++= [{
-  modifier: control
-  keycode: char_t
-  mode: emacs
-  event: {
-    send: executehostcommand,
-    cmd: '
-      commandline edit -i (fd | tv --inline --no-remote)
-    '
-  }
+	modifier: control
+	keycode: char_t
+	mode: emacs
+	event: {
+		send: executehostcommand,
+		cmd: '
+			commandline edit -i (fd | tv --inline --no-remote)
+		'
+	}
 }]
 
 def monitor [
-  --duration (-d): duration = 1sec
-  command: closure
+	--duration (-d): duration = 1sec
+	command: closure
 ] {
-  loop {
-    clear
-    let last_run = (date now)
-    let next = $last_run + $duration
-    do $command | print
-    sleep ($next - (date now))
-  }
+	loop {
+		clear
+		let last_run = (date now)
+		let next = $last_run + $duration
+		do $command | print
+		sleep ($next - (date now))
+	}
 }
