@@ -96,3 +96,7 @@ command = "tailwindcss-language-server"
 [language-server.tangram]
 args = ["-m", "client", "lsp"]
 command = "tangram"
+
+[language-server.typescript-language-server]
+args = ["typescript-language-server", "--stdio"]
+command = "bunx"

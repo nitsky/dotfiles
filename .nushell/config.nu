@@ -94,7 +94,6 @@ $env.PROMPT_MULTILINE_INDICATOR = $"(ansi red)•(ansi reset) "
 open ~/.secrets | from toml | load-env
 
 # tangram
-path add ./target/release
 alias tg = tangram
 alias tgd = ./target/debug/tangram -m client
 alias tgr = ./target/release/tangram -m client
