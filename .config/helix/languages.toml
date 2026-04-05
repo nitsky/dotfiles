@@ -8,7 +8,7 @@ name = "html"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint"]
+language-servers = [{ except-features = ["format"], name = "typescript" }, "oxfmt", "oxlint"]
 name = "javascript"
 
 [[language]]
@@ -18,7 +18,7 @@ name = "json"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript" }, "oxfmt", "oxlint", "tailwind"]
 name = "jsx"
 
 [[language]]
@@ -65,12 +65,12 @@ scope = "source.tangram-typescript"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript" }, "oxfmt", "oxlint", "tailwind"]
 name = "tsx"
 
 [[language]]
 auto-format = true
-language-servers = [{ except-features = ["format"], name = "typescript-language-server" }, "oxfmt", "oxlint", "tailwind"]
+language-servers = [{ except-features = ["format"], name = "typescript" }, "oxfmt", "oxlint", "tailwind"]
 name = "typescript"
 
 [language-server.mdx]
@@ -97,6 +97,6 @@ command = "tailwindcss-language-server"
 args = ["-m", "client", "lsp"]
 command = "tangram"
 
-[language-server.typescript-language-server]
-args = ["typescript-language-server", "--stdio"]
+[language-server.typescript]
+args = ["tsgo", "--lsp", "--stdio"]
 command = "bunx"

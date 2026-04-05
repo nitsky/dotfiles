@@ -8,7 +8,6 @@ path add ~/.bun/bin
 path add ~/.cargo/bin
 path add ~/.orbstack/bin
 path add ~/helix/target/release
-path add ~/nushell/target/release
 path add ~/.local/bin
 
 # aliases

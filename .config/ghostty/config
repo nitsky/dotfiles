@@ -1,4 +1,10 @@
-command = /Users/nitsky/nushell/target/release/nu
+auto-update-channel = tip
+
+command = /opt/homebrew/bin/nu
+
+copy-on-select = clipboard
+clipboard-read = allow
+clipboard-write = allow
 
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt
@@ -7,11 +13,10 @@ font-feature = -liga
 font-size = 16
 font-thicken = true
 
+split-divider-color = #222222
+
 macos-option-as-alt = true
 macos-titlebar-style = tabs
-
-keybind = shift+enter=text:\n
-keybind = alt+shift+n=text:\x1bN
 
 background = 000000
 foreground = dddddd
