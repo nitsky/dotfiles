@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+# Prefer tmux when present because it can forward OSC 52 from nested SSH sessions.
+if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
+	exec tmux load-buffer -w -
+fi
+
+if command -v pbcopy >/dev/null 2>&1; then
+	exec pbcopy
+fi
+
+if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null 2>&1; then
+	exec wl-copy --type text/plain
+fi
+
+if [ -n "${DISPLAY:-}" ] && command -v xclip >/dev/null 2>&1; then
+	exec xclip -i -selection clipboard
+fi
+
+if [ -n "${DISPLAY:-}" ] && command -v xsel >/dev/null 2>&1; then
+	exec xsel -i -b
+fi
+
+if command -v win32yank.exe >/dev/null 2>&1; then
+	exec win32yank.exe -i --crlf
+fi
+
+encoded="$(base64 | tr -d '\r\n')"
+if [ -w /dev/tty ]; then
+	printf '\033]52;c;%s\a' "$encoded" >/dev/tty
+else
+	printf '\033]52;c;%s\a' "$encoded"
+fi
