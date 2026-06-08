@@ -6,6 +6,7 @@ path add /opt/homebrew/bin
 path add /opt/homebrew/opt/llvm/bin
 path add ~/.bun/bin
 path add ~/.cargo/bin
+path add ~/.grok/bin
 path add ~/.orbstack/bin
 path add ~/helix/target/release
 path add ~/.local/bin
@@ -14,7 +15,7 @@ path add ~/.local/bin
 alias b = bun
 alias bx = bunx
 alias c = bat
-alias code = ^open -a "Visual Studio Code"
+alias cursor = ^cursor-agent
 alias d = docker
 alias dotfiles = git --git-dir ~/.dotfiles --work-tree ~/ -c core.fsmonitor=false
 alias e = hx
@@ -195,4 +196,41 @@ def monitor [
 		do $command | print
 		sleep ($next - (date now))
 	}
+}
+
+const box_instance_id = "ocid1.instance.oc1.iad.anuwcljtw252hhqcoq6x2v2ogct7dszb2bm7ykizkdkwilwpt44htn4pfmya"
+def "box start" [
+	--cpus: number  # Optional OCPU count for the flex shape.
+	--memory: number  # Optional memory in GB for the flex shape.
+] {
+	if ($cpus != null) or ($memory != null) {
+		mut shape_config = {}
+		if $cpus != null {
+			$shape_config = ($shape_config | insert ocpus $cpus)
+		}
+		if $memory != null {
+			$shape_config = ($shape_config | insert memoryInGBs $memory)
+		}
+		oci compute instance update --instance-id $box_instance_id --shape-config ($shape_config | to json -r) --force
+	}
+	oci compute instance action --instance-id $box_instance_id --action START --wait-for-state RUNNING
+}
+def "box status" [] {
+	let instance = (
+		oci compute instance get --instance-id $box_instance_id
+		| from json
+		| get data
+	)
+	{
+		name: ($instance | get display-name)
+		state: ($instance | get lifecycle-state)
+		shape: ($instance | get shape)
+		ocpus: ($instance | get shape-config.ocpus)
+		memory_gb: ($instance | get shape-config.memory-in-gbs)
+		region: ($instance | get region)
+		availability_domain: ($instance | get availability-domain)
+	}
+}
+def "box stop" [] {
+	oci compute instance action --instance-id $box_instance_id --action STOP --wait-for-state STOPPED
 }

@@ -1,5 +1,3 @@
-auto-update-channel = tip
-
 command = /opt/homebrew/bin/nu
 
 copy-on-select = clipboard
