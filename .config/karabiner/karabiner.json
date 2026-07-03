@@ -1,40 +1,40 @@
 {
-	"profiles": [
-		{
-			"complex_modifications": {
-				"rules": [
-					{
-						"description": "Change caps lock to escape on tap, control on hold.",
-						"manipulators": [
-							{
-								"from": {
-									"key_code": "caps_lock",
-									"modifiers": { "optional": ["any"] }
-								},
-								"to": [{ "key_code": "left_control" }],
-								"to_if_alone": [{ "key_code": "escape" }],
-								"type": "basic"
-							}
-						]
-					}
-				]
-			},
-			"devices": [
-				{
-					"identifiers": {
-						"is_keyboard": true,
-						"product_id": 6519,
-						"vendor_id": 12951
-					},
-					"ignore": true
-				}
-			],
-			"name": "default",
-			"selected": true,
-			"virtual_hid_keyboard": {
-				"country_code": 0,
-				"keyboard_type_v2": "ansi"
-			}
-		}
-	]
+    "profiles": [
+        {
+            "complex_modifications": {
+                "rules": [
+                    {
+                        "description": "Change caps lock to escape on tap, control on hold.",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "caps_lock",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "left_control" }],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "devices": [
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 6519,
+                        "vendor_id": 12951
+                    },
+                    "ignore": true
+                }
+            ],
+            "name": "default",
+            "selected": true,
+            "virtual_hid_keyboard": {
+                "country_code": 0,
+                "keyboard_type_v2": "ansi"
+            }
+        }
+    ]
 }

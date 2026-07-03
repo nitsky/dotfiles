@@ -5,7 +5,6 @@ bufferline = "always"
 color-modes = true
 cursorline = true
 end-of-line-diagnostics = "warning"
-insecure = true
 shell = ["nu", "--stdin", "-c"]
 
 [editor.cursor-shape]

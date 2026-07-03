@@ -88,6 +88,7 @@ command = "bunx"
 [language-server.rust-analyzer.config]
 cargo = { features = "all" }
 check = { command = "clippy" }
+files = { watcher = "server" }
 
 [language-server.tailwind]
 args = ["--stdio"]
