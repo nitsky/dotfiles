@@ -93,6 +93,92 @@ $env.PROMPT_MULTILINE_INDICATOR = $"(ansi red)•(ansi reset) "
 # secrets
 open ~/.secrets | from toml | load-env
 
+# codex
+def _codex-rate-limits [] {
+	let initialize = ({
+		method: initialize
+		id: 1
+		params: {
+			clientInfo: { name: codex-rate-limits, version: "1.0" }
+			capabilities: { experimentalApi: true }
+		}
+	} | to json -r)
+	let initialized = ({ method: initialized } | to json -r)
+	let read = ({
+		method: "account/rateLimits/read"
+		id: 2
+		params: null
+	} | to json -r)
+	let responses = (
+		[
+			{ delay: 0ms, message: $initialize }
+			{ delay: 200ms, message: $initialized }
+			{ delay: 100ms, message: $read }
+			{ delay: 3sec, message: $initialized }
+		]
+		| each {|item| sleep $item.delay; $item.message }
+		| to text
+		| ^codex app-server --stdio err> /dev/null
+		| lines
+		| each {|line| try { $line | from json } catch { null } }
+		| compact
+	)
+	let matches = ($responses | where id? == 2)
+	if ($matches | is-empty) {
+		error make { msg: "Codex did not return usage information." }
+	}
+	let response = ($matches | first)
+	if $response.error? != null {
+		error make { msg: ($response.error | to json -r) }
+	}
+	$response.result
+}
+
+def codex-usage [] {
+	let result = (_codex-rate-limits)
+	[
+		($result | get -o rateLimits.primary)
+		($result | get -o rateLimits.secondary)
+	]
+	| compact
+	| each {|window|
+		let resets_at = ($window | get -o resetsAt)
+		{
+			window: ($window.windowDurationMins * 1min)
+			available: $"(100 - $window.usedPercent)%"
+			resets: (if $resets_at == null {
+				"unknown"
+			} else {
+				$resets_at
+				| into datetime -f "%s"
+				| date to-timezone local
+				| format date "%b %d, %Y %I:%M %p %Z"
+			})
+		}
+	}
+}
+
+def codex-resets [] {
+	let result = (_codex-rate-limits)
+	$result
+	| get -o rateLimitResetCredits.credits
+	| default []
+	| each {|credit|
+		let expires_at = ($credit | get -o expiresAt)
+		{
+			reset: ($credit | get -o title)
+			expires: (if $expires_at == null {
+				"never"
+			} else {
+				$expires_at
+				| into datetime -f "%s"
+				| date to-timezone local
+				| format date "%b %d, %Y %I:%M %p %Z"
+			})
+		}
+	}
+}
+
 # tangram
 alias tg = tangram
 alias tgd = ./target/debug/tangram -m client
