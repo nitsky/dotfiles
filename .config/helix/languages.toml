@@ -99,5 +99,5 @@ args = ["-m", "client", "lsp"]
 command = "tangram"
 
 [language-server.typescript]
-args = ["tsgo", "--lsp", "--stdio"]
+args = ["tsc", "--lsp", "--stdio"]
 command = "bunx"

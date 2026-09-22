@@ -1,5 +1,7 @@
 use std/util "path add"
 
+source "~/.cargo/env.nu"
+
 # path
 path add /opt/homebrew/sbin
 path add /opt/homebrew/bin
@@ -15,7 +17,6 @@ path add ~/.local/bin
 alias b = bun
 alias bx = bunx
 alias c = bat
-alias cursor = ^cursor-agent
 alias d = docker
 alias dotfiles = git --git-dir ~/.dotfiles --work-tree ~/ -c core.fsmonitor=false
 alias e = hx
@@ -29,6 +30,80 @@ alias tree = eza -T
 alias u = cd ..
 alias zed = ^open -a "Zed"
 
+# git
+# Show LOC changes by calendar period.
+def git-stats [] {
+	help git-stats
+}
+
+# Show the LOC landed on a day, such as `git-stats day 2026-08-11` or `git-stats day yesterday`.
+def "git-stats day" [day?: string, --ref: string = "main"] {
+	let day = if $day == null { date now } else { $day | date from-human }
+	let since = ($day | format date "%Y-%m-%d 00:00:00")
+	let until = ($day + 1day | format date "%Y-%m-%d 00:00:00")
+	_git-stats $since $until $ref
+}
+
+# Show the LOC landed in the Monday-based week containing a date, such as `git-stats week 2026-08-03`.
+def "git-stats week" [day?: string, --ref: string = "main"] {
+	let day = if $day == null { date now } else { $day | date from-human }
+	let weekday = ($day | format date "%u" | into int)
+	let start = ($day - (($weekday - 1) * 1day))
+	let since = ($start | format date "%Y-%m-%d 00:00:00")
+	let until = ($start + 7day | format date "%Y-%m-%d 00:00:00")
+	_git-stats $since $until $ref
+}
+
+# Show the LOC landed in a month, such as `git-stats month 2026-07`.
+def "git-stats month" [month?: string, --ref: string = "main"] {
+	let month = if $month == null { date now } else { $"($month)-01" | date from-human }
+	let day = ($month | format date "%d" | into int)
+	let start = ($month - (($day - 1) * 1day))
+	let since = ($start | format date "%Y-%m-01 00:00:00")
+	let until = ($start + 32day | format date "%Y-%m-01 00:00:00")
+	_git-stats $since $until $ref
+}
+
+def _git-stats [since: string, until: string, ref: string] {
+	let result = (
+		^git log $ref --first-parent $"--since=($since)" $"--until=($until)" --format=commit:%H --numstat --diff-merges=first-parent
+		| complete
+	)
+	if $result.exit_code != 0 {
+		error make { msg: ($result.stderr | str trim) }
+	}
+	let lines = ($result.stdout | lines)
+	let commits = ($lines | where {|line| $line =~ '^commit:' } | length)
+	let stats = (
+		$lines
+		| where {|line| $line | str contains "\t" }
+		| each {|line|
+			let columns = ($line | split row "\t")
+			if $columns.0 == "-" {
+				null
+			} else {
+				{
+					insertions: ($columns.0 | into int)
+					deletions: ($columns.1 | into int)
+				}
+			}
+		}
+		| compact
+	)
+	let insertions = if ($stats | is-empty) { 0 } else { $stats.insertions | math sum }
+	let deletions = if ($stats | is-empty) { 0 } else { $stats.deletions | math sum }
+	{
+		ref: $ref
+		since: $since
+		until: $until
+		commits: $commits
+		insertions: $insertions
+		deletions: $deletions
+		churn: ($insertions + $deletions)
+		net: ($insertions - $deletions)
+	}
+}
+
 # banner
 $env.config.show_banner = false
 
@@ -37,10 +112,14 @@ $env.BUN_INSTALL = "~/.bun" | path expand
 
 # cursor
 $env.config.cursor_shape.emacs = "line"
+$env.config.cursor_shape.helix_insert = "line"
+$env.config.cursor_shape.helix_normal = "block"
+$env.config.color_config.selection = { bg: "#05428f" }
 
 # editor
 $env.EDITOR = "hx"
 $env.config.buffer_editor = "hx"
+$env.config.edit_mode = 'emacs'
 
 # fzf
 $env.FZF_DEFAULT_OPTS = "--reverse --exit-0 --select-1 --preview=bat --color=16,fg+:blue,pointer:blue"
@@ -88,6 +167,8 @@ $env.PROMPT_COMMAND = {
 };
 $env.PROMPT_COMMAND_RIGHT = ""
 $env.PROMPT_INDICATOR = $"(ansi red)➜(ansi reset) "
+$env.PROMPT_INDICATOR_VI_INSERT = $env.PROMPT_INDICATOR
+$env.PROMPT_INDICATOR_VI_NORMAL = $env.PROMPT_INDICATOR
 $env.PROMPT_MULTILINE_INDICATOR = $"(ansi red)•(ansi reset) "
 
 # secrets
@@ -284,7 +365,7 @@ def monitor [
 	}
 }
 
-const box_instance_id = "ocid1.instance.oc1.iad.anuwcljtw252hhqcoq6x2v2ogct7dszb2bm7ykizkdkwilwpt44htn4pfmya"
+const box_instance_id = "ocid1.instance.oc1.iad.anuwcljtw252hhqckwm6hatmpxt22zhvoku4jwmhihdwwvx42f2slco54jgq"
 def "box start" [
 	--cpus: number  # Optional OCPU count for the flex shape.
 	--memory: number  # Optional memory in GB for the flex shape.
@@ -318,5 +399,5 @@ def "box status" [] {
 	}
 }
 def "box stop" [] {
-	oci compute instance action --instance-id $box_instance_id --action STOP --wait-for-state STOPPED
+	oci compute instance action --instance-id $box_instance_id --action SOFTSTOP --wait-for-state STOPPED
 }

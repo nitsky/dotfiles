@@ -42,7 +42,7 @@
 "ui.menu.scroll" = { bg = "#333333", fg = "blue" }
 "ui.menu.selected" = "blue"
 "ui.popup" = { bg = "#111111" }
-"ui.popup.info" = { bg = "#1111111", fg = "#bbbbbb" }
+"ui.popup.info" = { bg = "#111111", fg = "#bbbbbb" }
 "ui.selection" = { bg = "#333333" }
 "ui.selection.primary" = { bg = "#05428f" }
 "ui.statusline" = { bg = "#000000" }
