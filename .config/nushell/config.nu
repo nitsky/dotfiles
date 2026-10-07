@@ -172,7 +172,9 @@ $env.PROMPT_INDICATOR_VI_NORMAL = $env.PROMPT_INDICATOR
 $env.PROMPT_MULTILINE_INDICATOR = $"(ansi red)•(ansi reset) "
 
 # secrets
-open ~/.secrets | from toml | load-env
+if ("~/.secrets" | path exists) {
+	open ~/.secrets | from toml | load-env
+}
 
 # codex
 def _codex-rate-limits [] {
@@ -366,19 +368,65 @@ def monitor [
 }
 
 const box_instance_id = "ocid1.instance.oc1.iad.anuwcljtw252hhqckwm6hatmpxt22zhvoku4jwmhihdwwvx42f2slco54jgq"
+# Show the available box subcommands.
+def box [] {
+	help box
+}
+
+# Resize nitsky, preserving unspecified resources. A running instance may reboot.
+# Examples: box resize --cpus 8 --memory 32; box resize --memory 64
+def "box resize" [
+	--cpus: number  # OCPU count (one OCPU is two vCPUs on this AMD machine).
+	--memory: number  # Memory in GB.
+] {
+	if ($cpus == null) and ($memory == null) {
+		error make { msg: "Specify --cpus and/or --memory, e.g. box resize --cpus 8 --memory 32." }
+	}
+	if $cpus != null {
+		if $cpus <= 0 {
+			error make { msg: "--cpus must be greater than zero." }
+		}
+	}
+	if $memory != null {
+		if $memory <= 0 {
+			error make { msg: "--memory must be greater than zero." }
+		}
+	}
+	let instance = (box status)
+	if $instance.state not-in [RUNNING STOPPED] {
+		error make { msg: $"Wait for nitsky to be RUNNING or STOPPED before resizing; current state: ($instance.state)." }
+	}
+	let shape_config = {
+		ocpus: ($cpus | default $instance.ocpus)
+		memoryInGBs: ($memory | default $instance.memory_gb)
+	}
+	let result = (
+		oci compute instance update --instance-id $box_instance_id --shape-config ($shape_config | to json -r) --force --wait-for-state $instance.state
+		| complete
+	)
+	if $result.exit_code != 0 {
+		error make { msg: ($result.stderr | str trim) }
+	}
+	box status
+}
+
+# Set nitsky's OCPU count, preserving its memory. A running instance may reboot.
+def "box cpus" [count: number] {
+	box resize --cpus $count
+}
+
+# Set nitsky's memory in GB, preserving its OCPU count. A running instance may reboot.
+def "box memory" [gb: number] {
+	box resize --memory $gb
+}
+
+# Start nitsky, optionally resizing it first.
 def "box start" [
 	--cpus: number  # Optional OCPU count for the flex shape.
 	--memory: number  # Optional memory in GB for the flex shape.
 ] {
 	if ($cpus != null) or ($memory != null) {
-		mut shape_config = {}
-		if $cpus != null {
-			$shape_config = ($shape_config | insert ocpus $cpus)
-		}
-		if $memory != null {
-			$shape_config = ($shape_config | insert memoryInGBs $memory)
-		}
-		oci compute instance update --instance-id $box_instance_id --shape-config ($shape_config | to json -r) --force
+		box resize --cpus $cpus --memory $memory | ignore
 	}
 	oci compute instance action --instance-id $box_instance_id --action START --wait-for-state RUNNING
 }

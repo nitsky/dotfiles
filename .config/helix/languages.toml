@@ -54,6 +54,17 @@ scope = "source.tangram-javascript"
 
 [[language]]
 auto-format = true
+comment-token = "#"
+file-types = [{ glob = "tangram.py" }, { glob = "*.tg.py" }]
+grammar = "python"
+indent = { tab-width = 4, unit = "    " }
+language-servers = ["tangram-python"]
+name = "tangram-python"
+roots = []
+scope = "source.tangram-python"
+
+[[language]]
+auto-format = true
 comment-token = "//"
 file-types = [{ glob = "tangram.ts" }, { glob = "*.tg.ts" }]
 grammar = "typescript"
@@ -97,6 +108,10 @@ command = "tailwindcss-language-server"
 [language-server.tangram]
 args = ["-m", "client", "lsp"]
 command = "tangram"
+
+[language-server.tangram-python]
+args = ["-d", "/Users/nitsky/tangram3/.tangram", "-m", "client", "lsp"]
+command = "/Users/nitsky/tangram3/target/debug/tangram"
 
 [language-server.typescript]
 args = ["tsc", "--lsp", "--stdio"]
