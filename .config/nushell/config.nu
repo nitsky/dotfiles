@@ -125,10 +125,36 @@ $env.config.edit_mode = 'emacs'
 $env.FZF_DEFAULT_OPTS = "--reverse --exit-0 --select-1 --preview=bat --color=16,fg+:blue,pointer:blue"
 $env.FZF_DEFAULT_COMMAND = "fd --type f --no-ignore"
 
+# Refresh this shell's SSH agent after reattaching to tmux.
+def --env ssh-agent-refresh [] {
+	if ($env.TMUX_PANE? | is-empty) {
+		error make { msg: "run this command inside tmux" }
+	}
+	let session = (^tmux display-message -p -t $env.TMUX_PANE '#{session_id}' | complete)
+	if $session.exit_code != 0 {
+		error make { msg: ($session.stderr | str trim) }
+	}
+	let agent = (^tmux show-environment -t ($session.stdout | str trim) SSH_AUTH_SOCK | complete)
+	let agent = ($agent.stdout | str trim)
+	if not ($agent | str starts-with 'SSH_AUTH_SOCK=') {
+		error make { msg: "this tmux session has no SSH agent; reconnect with agent forwarding and reattach" }
+	}
+	let socket = ($agent | str replace 'SSH_AUTH_SOCK=' '')
+	let agent = (with-env { SSH_AUTH_SOCK: $socket } { ^ssh-add -l | complete })
+	if $agent.exit_code not-in [0 1] {
+		error make { msg: "the tmux session's SSH agent is unreachable; reconnect with agent forwarding and reattach" }
+	}
+	$env.SSH_AUTH_SOCK = $socket
+	print $"SSH agent: ($socket)"
+}
+
 # gpg
 $env.GPG_TTY = (tty)
-$env.SSH_AUTH_SOCK = (gpgconf --list-dirs agent-ssh-socket)
-if ((pgrep -q gpg-agent | complete | get exit_code) == 0) {
+# Prefer local GPG, but preserve a reachable agent inherited over SSH.
+let ssh_agent = (^ssh-add -l | complete)
+let forwarded_agent = (not ($env.SSH_CONNECTION? | is-empty)) and ($ssh_agent.exit_code in [0 1])
+if not $forwarded_agent {
+	$env.SSH_AUTH_SOCK = (gpgconf --list-dirs agent-ssh-socket)
 	gpgconf --launch gpg-agent
 }
 
@@ -217,49 +243,228 @@ def _codex-rate-limits [] {
 	$response.result
 }
 
-def codex-usage [] {
-	let result = (_codex-rate-limits)
-	[
-		($result | get -o rateLimits.primary)
-		($result | get -o rateLimits.secondary)
-	]
-	| compact
-	| each {|window|
-		let resets_at = ($window | get -o resetsAt)
-		{
-			window: ($window.windowDurationMins * 1min)
-			available: $"(100 - $window.usedPercent)%"
-			resets: (if $resets_at == null {
-				"unknown"
-			} else {
-				$resets_at
-				| into datetime -f "%s"
-				| date to-timezone local
-				| format date "%b %d, %Y %I:%M %p %Z"
-			})
+def _usage-time [value, missing: string = "unknown"] {
+	if $value == null { return $missing }
+	let date = if ($value | describe) == "int" {
+		$value | into datetime -f "%s"
+	} else {
+		$value | into datetime
+	}
+	$date | date to-timezone local | format date "%b %d, %Y %I:%M %p %Z"
+}
+
+def _usage-openai [result: record] {
+	let limits = ($result | get -o rateLimitsByLimitId | default {})
+	let limits = if ($limits | is-empty) {
+		[($result | get -o rateLimits)] | compact
+	} else {
+		$limits | values
+	}
+	let windows = ($limits | each {|limit|
+		[$limit.primary? $limit.secondary?] | compact | each {|window|
+			{
+				provider: OpenAI
+				window: ($window.windowDurationMins * 1min | into string)
+				used: $"($window.usedPercent)%"
+				available: $"(100 - $window.usedPercent)%"
+				resets: (_usage-time $window.resetsAt?)
+			}
 		}
+	} | flatten)
+	let credit = ($result | get -o rateLimits.credits)
+	let balance = if $credit.unlimited? == true {
+		"unlimited"
+	} else if $credit.balance? != null {
+		$"($credit.balance | into float | math round --precision 2) credits"
+	} else if $credit.hasCredits? == false {
+		"0 credits"
+	} else {
+		"not reported"
+	}
+	let resets = ($result | get -o rateLimitResetCredits.credits | default [] | each {|credit|
+		{
+			provider: OpenAI
+			reset: ($credit.title? | default "Rate-limit reset")
+			count: 1
+			status: ($credit.status? | default "unknown")
+			expires: (_usage-time $credit.expiresAt? "never")
+		}
+	})
+	{
+		windows: $windows
+		credits: [{provider: OpenAI, balance: $balance}]
+		resets: $resets
+		reset_count: ($result | get -o rateLimitResetCredits.availableCount)
 	}
 }
 
-def codex-resets [] {
-	let result = (_codex-rate-limits)
-	$result
-	| get -o rateLimitResetCredits.credits
-	| default []
-	| each {|credit|
-		let expires_at = ($credit | get -o expiresAt)
+def _anthropic-usage [] {
+	let config_dir = ($env.CLAUDE_CONFIG_DIR? | default ($env.HOME | path join ".claude"))
+	let credentials_file = ($config_dir | path join ".credentials.json")
+	# Keep the token in memory, not shell arguments, logs, or output.
+	let token = if not ($env.CLAUDE_CODE_OAUTH_TOKEN? | is-empty) {
+		$env.CLAUDE_CODE_OAUTH_TOKEN
+	} else {
+		let credentials = if $nu.os-info.name == "macos" {
+			let keychain = (^security find-generic-password -s "Claude Code-credentials" -w | complete)
+			if $keychain.exit_code == 0 {
+				try { $keychain.stdout | from json } catch { {} }
+			} else if ($credentials_file | path exists) {
+				try { open --raw $credentials_file | from json } catch { {} }
+			} else { {} }
+		} else if ($credentials_file | path exists) {
+			try { open --raw $credentials_file | from json } catch { {} }
+		} else { {} }
+		$credentials | get -o claudeAiOauth.accessToken
+	}
+	if ($token | is-empty) {
+		error make { msg: "No Claude subscription login found; run claude auth login if applicable." }
+	}
+	# Undocumented Claude Code endpoint; do not refresh or alter its credentials.
+	let response = try {
+		http get --full --allow-errors --max-time 10sec --redirect-mode error --headers {
+			Authorization: $"Bearer ($token)"
+			anthropic-beta: "oauth-2025-04-20"
+		} "https://api.anthropic.com/api/oauth/usage?cedar_ember=1"
+	} catch {
+		error make { msg: "Anthropic usage request failed; check your network connection." }
+	}
+	if $response.status in [401 403] {
+		error make { msg: "Claude login expired or lacks usage access; open Claude Code or run claude auth login." }
+	}
+	if $response.status != 200 {
+		error make { msg: $"Anthropic usage unavailable: HTTP ($response.status)." }
+	}
+	# Claude Code's prepaid balance endpoint can report a balance even when
+	# usage.spend.balance is null. Failure here must not hide quota information.
+	let prepaid = try {
+		let auth = (^claude auth status | complete)
+		let org = ($auth.stdout | from json | get -o orgId)
+		if $org == null or $org !~ '^[a-zA-Z0-9-]+$' { null } else {
+			let balance = (http get --full --allow-errors --max-time 10sec --redirect-mode error --headers {
+				Authorization: $"Bearer ($token)"
+				anthropic-beta: "oauth-2025-04-20"
+			} $"https://api.anthropic.com/api/oauth/organizations/($org)/prepaid/credits")
+			if $balance.status == 200 { $balance.body } else { null }
+		}
+	} catch { null }
+	$response.body | insert prepaid_balance $prepaid
+}
+
+def _usage-anthropic [result: record] {
+	# New responses include model-specific limits that the legacy fields omit.
+	let limits = ($result.limits? | default [])
+	let windows = if not ($limits | is-empty) {
+		$limits | each {|limit|
+			let window = match $limit.kind {
+				"session" => "5hr"
+				"weekly_all" => "7day"
+				"weekly_scoped" => $"7day ($limit.scope.model.display_name? | default ($limit.scope.surface? | default 'scoped'))"
+				_ => $limit.kind
+			}
+			{
+				provider: Anthropic
+				window: $window
+				used: $"($limit.percent)%"
+				available: $"(100 - $limit.percent)%"
+				resets: (_usage-time $limit.resets_at?)
+			}
+		}
+	} else {
+		$result | transpose name value
+		| where {|entry| $entry.value != null and ($entry.name =~ '^(five_hour|seven_day)') }
+		| each {|entry|
+			{
+				provider: Anthropic
+				window: ($entry.name | str replace 'five_hour' '5hr' | str replace 'seven_day' '7day' | str replace --all '_' ' ')
+				used: $"($entry.value.utilization)%"
+				available: $"(100 - $entry.value.utilization)%"
+				resets: (_usage-time $entry.value.resets_at?)
+			}
+		}
+	}
+	# A spending cap minus spend is NOT a prepaid credit balance.
+	let prepaid = ($result.prepaid_balance? | default {})
+	let credit = ($prepaid | get -o balance.credits)
+	let money = ($prepaid | get -o balance.money | default ($result | get -o spend.balance))
+	let balance = if $credit.amount_minor? != null and $credit.exponent? != null {
+		$"($credit.amount_minor / (10 ** $credit.exponent) | math round --precision 2) credits"
+	} else if $prepaid.balance_credits? != null {
+		$"($prepaid.balance_credits) credits"
+	} else if $money.amount_minor? != null and $money.exponent? != null {
+		$"($money.amount_minor / (10 ** $money.exponent) | math round --precision 2) ($money.currency? | default 'credits')"
+	} else if $prepaid.amount? != null {
+		$"($prepaid.amount / 100 | math round --precision 2) ($prepaid.currency? | default 'USD')"
+	} else {
+		"not reported"
+	}
+	let grants = ($result | get -o cedar_ember.grants | default [])
+	let resets = ($grants | each {|grant|
 		{
-			reset: ($credit | get -o title)
-			expires: (if $expires_at == null {
-				"never"
+			provider: Anthropic
+			reset: ($grant.label? | default "Rate-limit reset")
+			count: $grant.resets_left
+			status: (if $grant.paused? == true { "paused" } else if $grant.usable_now? == true { "available" } else { "not currently usable" })
+			expires: (_usage-time $grant.ends_at? "never")
+		}
+	})
+	let reset_count = if $result.cedar_ember? == null {
+		"not reported"
+	} else if $result.cedar_ember.eligible? == false {
+		"not eligible"
+	} else if ($grants | is-empty) {
+		0
+	} else {
+		$grants | get resets_left | math sum
+	}
+	{
+		windows: $windows
+		credits: [{provider: Anthropic, balance: $balance}]
+		resets: $resets
+		reset_count: $reset_count
+	}
+}
+
+# Subscription quotas, reset times/credits, and balances (not Platform API billing).
+def usage [--json # Return structured JSON instead of displaying tables.
+] {
+	mut windows = []
+	mut credits = []
+	mut resets = []
+	mut reset_counts = []
+	mut errors = []
+	for provider in [OpenAI Anthropic] {
+		let data = try {
+			if $provider == "OpenAI" {
+				_usage-openai (_codex-rate-limits)
 			} else {
-				$expires_at
-				| into datetime -f "%s"
-				| date to-timezone local
-				| format date "%b %d, %Y %I:%M %p %Z"
+				_usage-anthropic (_anthropic-usage)
+			}
+		} catch {|err|
+			{error: $err.msg}
+		}
+		if $data.error? != null {
+			$errors = ($errors | append {provider: $provider, error: $data.error})
+		} else {
+			$windows = ($windows | append $data.windows)
+			$credits = ($credits | append $data.credits)
+			$resets = ($resets | append $data.resets)
+			$reset_counts = ($reset_counts | append {
+				provider: $provider
+				available: ($data.reset_count | default "not reported")
 			})
 		}
 	}
+	let result = {usage: $windows, credits: $credits, reset_counts: $reset_counts, resets: $resets, errors: $errors}
+	if $json { return ($result | to json) }
+	print "usage"
+	print ($windows | table)
+	print "resets"
+	let openai_resets = ($resets | where provider == "OpenAI")
+	if not ($openai_resets | is-empty) { print ($openai_resets | table) }
+	print "credits"
+	print ($credits | table)
+	for err in $errors { print --stderr $"($err.provider): ($err.error)" }
 }
 
 # tangram
