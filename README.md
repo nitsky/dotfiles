@@ -14,48 +14,66 @@ Do not add private-key backups, PINs, passphrases, or recovery codes to Git.
 
 ## Set up a machine from scratch
 
-### Install the dotfiles
+All routine setup lives in `~/.config/dotfiles/setup.sh`. It runs with Bash,
+Zsh, or a POSIX shell. Install Git, Nushell, tmux, GnuPG, and `pinentry-mac`
+(macOS) or `pinentry-tty` (Linux) first; package installation is managed separately.
 
-Install Git first. Run the bootstrap commands below in the machine's default
-Bash or Zsh shell, before Nushell is installed and configured.
-
-Clone over HTTPS so the initial checkout does not require SSH authentication:
-
-```sh
-git clone --bare https://github.com/nitsky/dotfiles "$HOME/.dotfiles"
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.fsmonitor false
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
-```
-
-If checkout reports existing files that would be overwritten, stop and move or
-back up the specific conflicting files, then retry checkout. Avoid forcing a
-checkout over existing configuration. The repository-local settings disable
-the filesystem monitor during bootstrap and hide untracked home-directory files.
-
-Once SSH authentication to GitHub is configured, switch the remote to SSH and
-configure the upstream branch:
+On a new machine, download and review the script, then run it:
 
 ```sh
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" remote remove origin
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" remote add origin git@github.com:nitsky/dotfiles
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" branch --set-upstream-to=origin/main main
+curl -fsSL https://raw.githubusercontent.com/nitsky/dotfiles/main/.config/dotfiles/setup.sh -o /tmp/dotfiles-setup.sh
+bash /tmp/dotfiles-setup.sh
 ```
 
-The checkout installs configuration files; it does not install the applications
-they configure. Review machine-specific paths and the `Host nitsky` forwarding
-block before using them on a different machine.
-
-### Name a Mac
-
-Choose names appropriate to the machine. For David's MacBook Pro:
+The download uses the published `main` branch; local changes must be pushed
+before they are available there. You can also copy the script to a new machine.
+Use `zsh` in place of `bash` if preferred. On an existing machine:
 
 ```sh
-sudo scutil --set ComputerName "David's MacBook Pro"
-sudo scutil --set HostName "davids-macbook-pro"
-sudo scutil --set LocalHostName "davids-macbook-pro"
+bash "$HOME/.config/dotfiles/setup.sh"
 ```
+
+The script clones the bare repository over HTTPS when needed, checks out a
+fresh clone, disables Git's filesystem monitor for this repository, hides
+untracked home-directory files, and creates executable symlinks. Existing
+checkouts and their pending changes are preserved. If checkout reports conflicts,
+back up the specific conflicting files and rerun setup.
+
+### Executable symlinks
+
+| Local symlink | Target |
+| --- | --- |
+| `~/.local/bin/dotfiles-nu` | Installed `nu` executable |
+| `~/.local/bin/dotfiles-pinentry` | `pinentry-mac` on macOS; `pinentry-tty` on Linux |
+
+Tmux and GPG use these stable paths. Setup searches `PATH` and the usual Homebrew
+locations. The symlinks are generated per machine; do not add them to Git.
+Rerun setup if an installation path changes. It replaces existing symlinks and
+refuses to overwrite ordinary files or directories. It does not change the
+login shell.
+
+### Optional setup steps
+
+After configuring GitHub SSH authentication, switch origin to SSH and configure
+the `main` upstream with:
+
+```sh
+bash "$HOME/.config/dotfiles/setup.sh" --ssh-remote
+```
+
+To name a Mac, choose names appropriate to that machine. For David's MacBook Pro:
+
+```sh
+bash "$HOME/.config/dotfiles/setup.sh" --mac-name "David's MacBook Pro" --mac-hostname davids-macbook-pro
+```
+
+Mac naming uses `sudo`. Add `--reload` to reload a running tmux server and the
+local GPG agent after setup; the tmux shell setting applies to new panes.
+Options can be combined. Run the script with `--help` for a list.
+
+Review machine-specific paths and the `Host nitsky` forwarding block before
+using them on another machine. The YubiKey provisioning, agent forwarding, and
+private-key restoration procedures below are separate from routine setup.
 
 ## YubiKeys
 
