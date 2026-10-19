@@ -150,9 +150,10 @@ def --env ssh-agent-refresh [] {
 
 # gpg
 $env.GPG_TTY = (tty)
-# Prefer local GPG, but preserve a reachable agent inherited over SSH.
+# Forwarded-agent support is retained, but local software keys are the default.
+# Set GPG_USE_FORWARDED_AGENT=true before sourcing to opt back in over SSH.
 let ssh_agent = (^ssh-add -l | complete)
-let forwarded_agent = (not ($env.SSH_CONNECTION? | is-empty)) and ($ssh_agent.exit_code in [0 1])
+let forwarded_agent = ($env.GPG_USE_FORWARDED_AGENT? | default false | into bool) and (not ($env.SSH_CONNECTION? | is-empty)) and ($ssh_agent.exit_code in [0 1])
 if not $forwarded_agent {
 	$env.SSH_AUTH_SOCK = (gpgconf --list-dirs agent-ssh-socket)
 	gpgconf --launch gpg-agent
@@ -320,11 +321,16 @@ def _anthropic-usage [] {
 	if ($token | is-empty) {
 		error make { msg: "No Claude subscription login found; run claude auth login if applicable." }
 	}
+	# Identify the Claude Code surface so that the endpoint includes reset grants.
+	let version = (^claude --version | str trim | split row " " | first)
+	let user_agent = (["claude-cli/" $version " (external, cli)"] | str join)
 	# Undocumented Claude Code endpoint; do not refresh or alter its credentials.
 	let response = try {
 		http get --full --allow-errors --max-time 10sec --redirect-mode error --headers {
 			Authorization: $"Bearer ($token)"
 			anthropic-beta: "oauth-2025-04-20"
+			x-app: cli
+			User-Agent: $user_agent
 		} "https://api.anthropic.com/api/oauth/usage?cedar_ember=1"
 	} catch {
 		error make { msg: "Anthropic usage request failed; check your network connection." }
@@ -457,14 +463,25 @@ def usage [--json # Return structured JSON instead of displaying tables.
 	}
 	let result = {usage: $windows, credits: $credits, reset_counts: $reset_counts, resets: $resets, errors: $errors}
 	if $json { return ($result | to json) }
-	print "usage"
-	print ($windows | table)
-	print "resets"
-	let openai_resets = ($resets | where provider == "OpenAI")
-	if not ($openai_resets | is-empty) { print ($openai_resets | table) }
-	print "credits"
-	print ($credits | table)
-	for err in $errors { print --stderr $"($err.provider): ($err.error)" }
+	for provider in [OpenAI Anthropic] {
+		if $provider != "OpenAI" { print "" }
+		print $provider
+		for window in ($windows | where provider == $provider) {
+			print $"  ($window.window): ($window.used) used, ($window.available) available; resets ($window.resets)"
+		}
+		for count in ($reset_counts | where provider == $provider) {
+			print $"  Resets: ($count.available)"
+		}
+		for reset in ($resets | where provider == $provider) {
+			print $"  ($reset.reset): ($reset.count), ($reset.status); expires ($reset.expires)"
+		}
+		for credit in ($credits | where provider == $provider) {
+			print $"  Credits: ($credit.balance)"
+		}
+		for err in ($errors | where provider == $provider) {
+			print $"  Error: ($err.error)"
+		}
+	}
 }
 
 # tangram

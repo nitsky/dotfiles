@@ -8,14 +8,13 @@
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true
   },
-  "fastMode": true,
   "tui": "fullscreen",
-  "theme": "dark",
-  "agentPushNotifEnabled": true,
   "voice": {
     "enabled": false,
     "mode": "hold"
   },
-  "voiceEnabled": false,
-  "remoteControlAtStartup": true
+  "theme": "dark",
+  "remoteControlAtStartup": true,
+  "agentPushNotifEnabled": true,
+  "voiceEnabled": false
 }

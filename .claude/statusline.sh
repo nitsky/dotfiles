@@ -48,8 +48,6 @@ effort=$(q '.effort.level // empty')
 fast=$(q '.fast_mode // false')
 size=$(q '.context_window.context_window_size // 0')
 remaining=$(q '.context_window.remaining_percentage // empty')
-total_in=$(q '.context_window.total_input_tokens // 0')
-total_out=$(q '.context_window.total_output_tokens // 0')
 five=$(q '.rate_limits.five_hour.used_percentage // empty')
 five_at=$(q '.rate_limits.five_hour.resets_at // empty')
 week=$(q '.rate_limits.seven_day.used_percentage // empty')
@@ -67,17 +65,13 @@ parts+=("$(printf '\033[34m%s\033[0m' "$model_text")")
 parts+=("$(human "$size") window")
 if [ -n "$remaining" ]; then
   used=$((100 - ${remaining%.*}))
-  parts+=("$(pct_color "$used")${remaining%.*}% left${reset}")
-fi
-parts+=("$(human "$total_in") in")
-parts+=("$(human "$total_out") out")
-parts+=("$(human $((total_in + total_out))) used")
-
-if [ -n "$five" ]; then
-  parts+=("5h $(pct_color "$five")${five%.*}%${reset}${dim} $(reset_in "$five_at")${reset}")
+  parts+=("context $(pct_color "$used")${remaining%.*}% left${reset}")
 fi
 if [ -n "$week" ]; then
-  parts+=("weekly $(pct_color "$week")${week%.*}%${reset}${dim} $(reset_in "$week_at")${reset}")
+  parts+=("weekly $(pct_color "$week")$((100 - ${week%.*}))% left${reset}${dim} $(reset_in "$week_at")${reset}")
+fi
+if [ -n "$five" ]; then
+  parts+=("5h $(pct_color "$five")$((100 - ${five%.*}))% left${reset}${dim} $(reset_in "$five_at")${reset}")
 fi
 
 out=""
