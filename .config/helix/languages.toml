@@ -43,6 +43,38 @@ name = "rust"
 
 [[language]]
 auto-format = true
+file-types = [{ glob = "*.tgi.json" }]
+grammar = "json"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["tangram"]
+name = "tangram-interface-json"
+roots = []
+scope = "source.tangram-interface-json"
+
+[[language]]
+auto-format = true
+comment-token = "#"
+file-types = [{ glob = "*.tgi.py" }]
+grammar = "python"
+indent = { tab-width = 4, unit = "    " }
+language-servers = ["tangram"]
+name = "tangram-interface-python"
+roots = []
+scope = "source.tangram-interface-python"
+
+[[language]]
+auto-format = true
+comment-token = "//"
+file-types = [{ glob = "*.tgi.ts" }]
+grammar = "typescript"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["tangram"]
+name = "tangram-interface-typescript"
+roots = []
+scope = "source.tangram-interface-typescript"
+
+[[language]]
+auto-format = true
 comment-token = "//"
 file-types = [{ glob = "tangram.js" }, { glob = "*.tg.js" }]
 grammar = "javascript"
@@ -51,6 +83,16 @@ language-servers = ["tangram"]
 name = "tangram-javascript"
 roots = []
 scope = "source.tangram-javascript"
+
+[[language]]
+auto-format = true
+file-types = [{ glob = "tangram.json" }, { glob = "*.tg.json" }]
+grammar = "json"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["tangram"]
+name = "tangram-json"
+roots = []
+scope = "source.tangram-json"
 
 [[language]]
 auto-format = true
@@ -65,6 +107,17 @@ scope = "source.tangram-python"
 
 [[language]]
 auto-format = true
+comment-token = "#"
+file-types = [{ glob = "tangram.toml" }, { glob = "*.tg.toml" }]
+grammar = "toml"
+indent = { tab-width = 2, unit = "\t" }
+language-servers = ["tangram"]
+name = "tangram-toml"
+roots = []
+scope = "source.tangram-toml"
+
+[[language]]
+auto-format = true
 comment-token = "//"
 file-types = [{ glob = "tangram.ts" }, { glob = "*.tg.ts" }]
 grammar = "typescript"
@@ -73,6 +126,17 @@ language-servers = ["tangram"]
 name = "tangram-typescript"
 roots = []
 scope = "source.tangram-typescript"
+
+[[language]]
+auto-format = true
+comment-token = "#"
+file-types = [{ glob = "tangram.yaml" }, { glob = "*.tg.yaml" }]
+grammar = "yaml"
+indent = { tab-width = 2, unit = "  " }
+language-servers = ["tangram"]
+name = "tangram-yaml"
+roots = []
+scope = "source.tangram-yaml"
 
 [[language]]
 auto-format = true
