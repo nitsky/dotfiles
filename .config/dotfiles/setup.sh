@@ -75,6 +75,14 @@ find_program() {
 }
 
 nu_path=$(find_program nu)
+# Preserve the installed target when the local symlink is already on PATH.
+if [ "$nu_path" = "$HOME/.local/bin/nu" ] && [ -L "$nu_path" ]; then
+    target=$(readlink "$nu_path")
+    case $target in
+        /*) nu_path=$target ;;
+        *) nu_path="$HOME/.local/bin/$target" ;;
+    esac
+fi
 pinentry_path=$(find_program "$pinentry")
 for dependency in git tmux gpgconf; do
     find_program "$dependency" >/dev/null
@@ -83,7 +91,7 @@ bin_dir="$HOME/.local/bin"
 
 # Check both destinations before changing either. Existing symlinks are safe
 # to replace, but ordinary files and directories belong to the user.
-for name in dotfiles-nu dotfiles-pinentry; do
+for name in nu dotfiles-pinentry; do
     destination="$bin_dir/$name"
     if [ -e "$destination" ] && [ ! -L "$destination" ]; then
         echo "Refusing to replace $destination; move it aside first." >&2
@@ -113,9 +121,9 @@ if [ ! -f "$HOME/.dotfiles/index" ]; then
 fi
 
 mkdir -p "$bin_dir"
-for name in dotfiles-nu dotfiles-pinentry; do
+for name in nu dotfiles-pinentry; do
     case $name in
-        dotfiles-nu) target=$nu_path ;;
+        nu) target=$nu_path ;;
         dotfiles-pinentry) target=$pinentry_path ;;
     esac
     destination="$bin_dir/$name"
