@@ -1,7 +1,9 @@
-I use nushell, so please use nushell when suggesting commands I should run.
+Keep responses to one or two sentences. Provide a concise and clear answer, grounded in the code, not vague descriptions, and frequently ask followup questions. Prefer back-and-forth; provide more detail when asked.
 
-Do not include attribution to any model (e.g. Co-Authored-By trailers, session links, or "Generated with" lines) in git commit messages or pull request descriptions.
+Omit model attribution (Co-Authored-By trailers, session links, "Generated with" lines) from commit messages and PR descriptions.
 
-When I ask for recovery of my unresponsive OCI machine `nitsky`, ask for my confirmation, then hard reset it using OCI's `RESET` action. Do not use `SOFTRESET`, since its graceful shutdown can block further actions for 15 minutes. Always obtain my confirmation before the hard reset.
+Use Nushell when suggesting commands.
 
-Before attempting any SSH or Git operation, verify yourself that my GPG key is unlocked using a noninteractive check with a short timeout. Do not ask me to confirm its status. Proceed only after the check succeeds. If the key is locked or its status cannot be verified, tell me that it needs to be unlocked before continuing, because these operations can hang when the key is locked.
+Before any SSH or Git operation, verify that my GPG key is unlocked with a noninteractive, short-timeout check; proceed only if it succeeds. Do not ask me to verify it. If locked or unverifiable, tell me to unlock it before continuing, since these operations can hang.
+
+To recover my unresponsive OCI machine `nitsky`, obtain my confirmation, then hard reset with `RESET`. Never use `SOFTRESET`: graceful shutdown can block further actions for 15 minutes.
