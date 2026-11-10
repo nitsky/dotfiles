@@ -484,12 +484,6 @@ def usage [--json # Return structured JSON instead of displaying tables.
 	}
 }
 
-# tangram
-alias tg = tangram
-alias tgd = ./target/debug/tangram -m client
-alias tgr = ./target/release/tangram -m client
-alias tgo = orb ./target/aarch64-unknown-linux-gnu/release/tangram
-
 # ctrl f for lf
 $env.config.keybindings ++= [{
 	modifier: control
