@@ -25,6 +25,7 @@ alias g = git
 alias j = jj
 alias l = lf
 alias k = kubectl
+alias t = tg run .#tg --
 alias time = timeit
 alias tree = eza -T
 alias u = cd ..
@@ -201,6 +202,30 @@ $env.PROMPT_MULTILINE_INDICATOR = $"(ansi red)•(ansi reset) "
 # secrets
 if ("~/.secrets" | path exists) {
 	open ~/.secrets | from toml | load-env
+}
+
+# Stop the Codex daemon and the Claude Code supervisor, including its background sessions.
+def ai-stop [] {
+	mut errors = []
+	for server in [
+		{name: Codex, command: codex, args: [app-server daemon stop]}
+		{name: "Claude Code", command: claude, args: [daemon stop --any]}
+	] {
+		let result = try {
+			run-external $server.command ...$server.args | complete
+		} catch {|err|
+			{exit_code: 1, stdout: "", stderr: $err.msg}
+		}
+		if $result.exit_code != 0 {
+			let detail = ([$result.stderr $result.stdout] | str join "\n" | str trim)
+			$errors = ($errors | append $"($server.name): exit ($result.exit_code)\n($detail)")
+		} else {
+			print $"($server.name): stopped"
+		}
+	}
+	if not ($errors | is-empty) {
+		error make {msg: ($errors | str join "\n")}
+	}
 }
 
 # codex
