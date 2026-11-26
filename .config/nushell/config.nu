@@ -1,15 +1,15 @@
 use std/util "path add"
 
-source "~/.cargo/env.nu"
-
 # path
 path add /opt/homebrew/sbin
+path add ~/.cargo/bin
 path add /opt/homebrew/bin
+path add /opt/homebrew/opt/rustup/bin
 path add /opt/homebrew/opt/llvm/bin
 path add ~/.bun/bin
-path add ~/.cargo/bin
 path add ~/.grok/bin
 path add ~/.orbstack/bin
+path add ~/.tangram/bin
 path add ~/helix/target/release
 path add ~/.local/bin
 
@@ -108,9 +108,6 @@ def _git-stats [since: string, until: string, ref: string] {
 # banner
 $env.config.show_banner = false
 
-# bun
-$env.BUN_INSTALL = "~/.bun" | path expand
-
 # cursor
 $env.config.cursor_shape.emacs = "line"
 $env.config.cursor_shape.helix_insert = "line"
@@ -204,28 +201,27 @@ if ("~/.secrets" | path exists) {
 	open ~/.secrets | from toml | load-env
 }
 
-# Stop the Codex daemon and the Claude Code supervisor, including its background sessions.
-def ai-stop [] {
-	mut errors = []
-	for server in [
-		{name: Codex, command: codex, args: [app-server daemon stop]}
-		{name: "Claude Code", command: claude, args: [daemon stop --any]}
-	] {
-		let result = try {
-			run-external $server.command ...$server.args | complete
-		} catch {|err|
-			{exit_code: 1, stdout: "", stderr: $err.msg}
-		}
-		if $result.exit_code != 0 {
-			let detail = ([$result.stderr $result.stdout] | str join "\n" | str trim)
-			$errors = ($errors | append $"($server.name): exit ($result.exit_code)\n($detail)")
-		} else {
-			print $"($server.name): stopped"
-		}
+def _stop-ai-daemon [name: string, command: string, ...args: string] {
+	let result = try {
+		run-external $command ...$args | complete
+	} catch {|err|
+		{exit_code: 1, stdout: "", stderr: $err.msg}
 	}
-	if not ($errors | is-empty) {
-		error make {msg: ($errors | str join "\n")}
+	if $result.exit_code != 0 {
+		let detail = ([$result.stderr $result.stdout] | str join "\n" | str trim)
+		error make {msg: $"($name): exit ($result.exit_code)\n($detail)"}
 	}
+	print $"($name): stopped"
+}
+
+# Stop the Codex daemon.
+def codex-stop [] {
+	_stop-ai-daemon Codex codex app-server daemon stop
+}
+
+# Stop the Claude Code supervisor and its background sessions.
+def claude-stop [] {
+	_stop-ai-daemon "Claude Code" claude daemon stop "--any"
 }
 
 # codex
@@ -456,56 +452,47 @@ def _usage-anthropic [result: record] {
 	}
 }
 
-# Subscription quotas, reset times/credits, and balances (not Platform API billing).
-def usage [--json # Return structured JSON instead of displaying tables.
+# Show Codex subscription quotas, resets, and credits.
+def codex-usage [--json # Return structured JSON.
 ] {
-	mut windows = []
-	mut credits = []
-	mut resets = []
-	mut reset_counts = []
-	mut errors = []
-	for provider in [OpenAI Anthropic] {
-		let data = try {
-			if $provider == "OpenAI" {
-				_usage-openai (_codex-rate-limits)
-			} else {
-				_usage-anthropic (_anthropic-usage)
-			}
-		} catch {|err|
-			{error: $err.msg}
+	_show-ai-usage OpenAI $json { _usage-openai (_codex-rate-limits) }
+}
+
+# Show Claude subscription quotas, resets, and credits.
+def claude-usage [--json # Return structured JSON.
+] {
+	_show-ai-usage Anthropic $json { _usage-anthropic (_anthropic-usage) }
+}
+
+def _show-ai-usage [provider: string, json: bool, fetch: closure] {
+	let result = try {
+		let data = (do $fetch)
+		{
+			usage: $data.windows
+			credits: $data.credits
+			reset_counts: [{provider: $provider, available: ($data.reset_count | default "not reported")}]
+			resets: $data.resets
+			errors: []
 		}
-		if $data.error? != null {
-			$errors = ($errors | append {provider: $provider, error: $data.error})
-		} else {
-			$windows = ($windows | append $data.windows)
-			$credits = ($credits | append $data.credits)
-			$resets = ($resets | append $data.resets)
-			$reset_counts = ($reset_counts | append {
-				provider: $provider
-				available: ($data.reset_count | default "not reported")
-			})
-		}
+	} catch {|err|
+		{usage: [], credits: [], reset_counts: [], resets: [], errors: [{provider: $provider, error: $err.msg}]}
 	}
-	let result = {usage: $windows, credits: $credits, reset_counts: $reset_counts, resets: $resets, errors: $errors}
 	if $json { return ($result | to json) }
-	for provider in [OpenAI Anthropic] {
-		if $provider != "OpenAI" { print "" }
-		print $provider
-		for window in ($windows | where provider == $provider) {
-			print $"  ($window.window): ($window.used) used, ($window.available) available; resets ($window.resets)"
-		}
-		for count in ($reset_counts | where provider == $provider) {
-			print $"  Resets: ($count.available)"
-		}
-		for reset in ($resets | where provider == $provider) {
-			print $"  ($reset.reset): ($reset.count), ($reset.status); expires ($reset.expires)"
-		}
-		for credit in ($credits | where provider == $provider) {
-			print $"  Credits: ($credit.balance)"
-		}
-		for err in ($errors | where provider == $provider) {
-			print $"  Error: ($err.error)"
-		}
+	print $provider
+	for window in $result.usage {
+		print $"  ($window.window): ($window.used) used, ($window.available) available; resets ($window.resets)"
+	}
+	for count in $result.reset_counts {
+		print $"  Resets: ($count.available)"
+	}
+	for reset in $result.resets {
+		print $"  ($reset.reset): ($reset.count), ($reset.status); expires ($reset.expires)"
+	}
+	for credit in $result.credits {
+		print $"  Credits: ($credit.balance)"
+	}
+	for err in $result.errors {
+		print $"  Error: ($err.error)"
 	}
 }
 

@@ -170,7 +170,7 @@ args = ["--stdio"]
 command = "tailwindcss-language-server"
 
 [language-server.tangram]
-args = ["-m", "client", "lsp"]
+args = ["lsp"]
 command = "tangram"
 
 [language-server.typescript]
