@@ -224,14 +224,9 @@ def claude-stop [] {
 	_stop-ai-daemon "Claude Code" claude daemon stop "--any"
 }
 
-# Restart Codex with the installed CLI and stop Claude Code so it restarts on demand.
-def ai-restart [] {
-	let errors = ([{|| codex-stop } {|| claude-stop }] | each {|stop|
-		try { do $stop } catch {|err| $err.msg }
-	} | compact)
-	if not ($errors | is-empty) {
-		error make {msg: ($errors | str join "\n")}
-	}
+# Restart Codex with the installed CLI.
+def codex-restart [] {
+	codex-stop
 	for args in [
 		[app-server daemon update --from-cli --yes]
 		[app-server daemon start]
@@ -252,7 +247,6 @@ def ai-restart [] {
 		error make {msg: $"Codex: daemon verification failed\n($result.stdout | str trim)"}
 	}
 	print $"Codex: running ($versions.appServerVersion), matching the CLI"
-	print "Claude Code: starts with the installed CLI on next launch"
 }
 
 # codex
