@@ -224,6 +224,37 @@ def claude-stop [] {
 	_stop-ai-daemon "Claude Code" claude daemon stop "--any"
 }
 
+# Restart Codex with the installed CLI and stop Claude Code so it restarts on demand.
+def ai-restart [] {
+	let errors = ([{|| codex-stop } {|| claude-stop }] | each {|stop|
+		try { do $stop } catch {|err| $err.msg }
+	} | compact)
+	if not ($errors | is-empty) {
+		error make {msg: ($errors | str join "\n")}
+	}
+	for args in [
+		[app-server daemon update --from-cli --yes]
+		[app-server daemon start]
+	] {
+		let result = (run-external codex ...$args | complete)
+		if $result.exit_code != 0 {
+			let detail = ([$result.stderr $result.stdout] | str join "\n" | str trim)
+			error make {msg: $"Codex ($args | str join ' '): exit ($result.exit_code)\n($detail)"}
+		}
+	}
+	let result = (^codex app-server daemon version | complete)
+	if $result.exit_code != 0 {
+		let detail = ([$result.stderr $result.stdout] | str join "\n" | str trim)
+		error make {msg: $"Codex: failed to verify the daemon version\n($detail)"}
+	}
+	let versions = ($result.stdout | from json)
+	if $versions.status != running or $versions.appServerVersion != $versions.cliVersion {
+		error make {msg: $"Codex: daemon verification failed\n($result.stdout | str trim)"}
+	}
+	print $"Codex: running ($versions.appServerVersion), matching the CLI"
+	print "Claude Code: starts with the installed CLI on next launch"
+}
+
 # codex
 def _codex-rate-limits [] {
 	let initialize = ({
